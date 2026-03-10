@@ -330,19 +330,13 @@
     }
 
     .code-body pre {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.82rem;
-      line-height: 1.7;
-      color: var(--text2);
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 0.83rem;
+      line-height: 1.75;
+      color: #cdd9e5;
       white-space: pre;
+      tab-size: 4;
     }
-
-    /* SQL syntax highlight */
-    .kw  { color: #ff7b72; font-weight: 600; }   /* keywords */
-    .fn  { color: #d2a8ff; }                      /* functions */
-    .str { color: #a5d6ff; }                      /* strings/aliases */
-    .cm  { color: #4d5f70; font-style: italic; }  /* comments */
-    .num { color: #79c0ff; }                      /* numbers */
 
     /* ====== ANALYSES ====== */
     #analyses {
@@ -719,48 +713,47 @@
           <span class="code-lang">SQL</span>
         </div>
         <div class="code-body">
-<pre><span class="cm">-- Classement des pilotes par nombre de victoires totales</span>
-<span class="kw">SELECT</span>
-    d.forename || <span class="str">' '</span> || d.surname   <span class="kw">AS</span> <span class="str">pilote</span>,
-    <span class="fn">COUNT</span>(r.resultId)               <span class="kw">AS</span> <span class="str">victoires</span>,
-    <span class="fn">RANK</span>() <span class="kw">OVER</span> (
-        <span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(r.resultId) <span class="kw">DESC</span>
-    )                               <span class="kw">AS</span> <span class="str">classement</span>
-
-<span class="kw">FROM</span> results r
-<span class="kw">JOIN</span> drivers d   <span class="kw">ON</span> r.driverId   = d.driverId
-<span class="kw">WHERE</span> r.position = <span class="num">1</span>
-<span class="kw">GROUP BY</span> d.driverId
-<span class="kw">ORDER BY</span> victoires <span class="kw">DESC</span>
-<span class="kw">LIMIT</span> <span class="num">10</span>;</pre>
+<pre>-- Classement des pilotes par nombre de victoires totales
+SELECT
+    d.forename || ' ' || d.surname  AS pilote,
+    COUNT(r.resultId)               AS victoires,
+    RANK() OVER (
+        ORDER BY COUNT(r.resultId) DESC
+    )                               AS classement
+FROM results r
+JOIN drivers d ON r.driverId = d.driverId
+WHERE r.position = 1
+GROUP BY d.driverId
+ORDER BY victoires DESC
+LIMIT 10;</pre>
         </div>
       </div>
 
       <!-- Extrait 2 -->
       <div class="code-block fade-in">
         <div class="code-header">
-          <span class="code-title">Analyse des pit stops — temps moyen par écurie et par saison</span>
+          <span class="code-title">Temps moyen des pit stops par écurie et par saison</span>
           <span class="code-lang">SQL</span>
         </div>
         <div class="code-body">
-<pre><span class="cm">-- CTE : durée moyenne des pit stops par constructeur</span>
-<span class="kw">WITH</span> <span class="str">pit_perf</span> <span class="kw">AS</span> (
-    <span class="kw">SELECT</span>
-        con.name                        <span class="kw">AS</span> <span class="str">ecurie</span>,
-        ra.year                         <span class="kw">AS</span> <span class="str">saison</span>,
-        <span class="fn">ROUND</span>(<span class="fn">AVG</span>(ps.milliseconds) / <span class="num">1000.0</span>, <span class="num">2</span>) <span class="kw">AS</span> <span class="str">duree_moy_sec</span>,
-        <span class="fn">COUNT</span>(*)                        <span class="kw">AS</span> <span class="str">nb_arrets</span>
-    <span class="kw">FROM</span> pit_stops ps
-    <span class="kw">JOIN</span> results   re  <span class="kw">ON</span> ps.raceId   = re.raceId
-                      <span class="kw">AND</span> ps.driverId = re.driverId
-    <span class="kw">JOIN</span> constructors con <span class="kw">ON</span> re.constructorId = con.constructorId
-    <span class="kw">JOIN</span> races ra          <span class="kw">ON</span> ps.raceId = ra.raceId
-    <span class="kw">GROUP BY</span> con.name, ra.year
+<pre>-- CTE : durée moyenne des pit stops par constructeur
+WITH pit_perf AS (
+    SELECT
+        con.name                          AS ecurie,
+        ra.year                           AS saison,
+        ROUND(AVG(ps.milliseconds) / 1000.0, 2) AS duree_moy_sec,
+        COUNT(*)                          AS nb_arrets
+    FROM pit_stops ps
+    JOIN results      re  ON ps.raceId = re.raceId
+                         AND ps.driverId = re.driverId
+    JOIN constructors con ON re.constructorId = con.constructorId
+    JOIN races        ra  ON ps.raceId = ra.raceId
+    GROUP BY con.name, ra.year
 )
-<span class="kw">SELECT</span> *
-<span class="kw">FROM</span>  <span class="str">pit_perf</span>
-<span class="kw">WHERE</span> nb_arrets &gt; <span class="num">10</span>
-<span class="kw">ORDER BY</span> saison <span class="kw">DESC</span>, duree_moy_sec <span class="kw">ASC</span>;</pre>
+SELECT *
+FROM pit_perf
+WHERE nb_arrets > 10
+ORDER BY saison DESC, duree_moy_sec ASC;</pre>
         </div>
       </div>
 
