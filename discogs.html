@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discogs Scraper — Jude Buyikana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #080c12;
+      --bg2:     #0d1117;
+      --bg3:     #111820;
+      --card:    #131b24;
+      --border:  #1e2d3d;
+      --purple:  #7b2fff;
+      --purple2: #a855f7;
+      --accent:  #00d4ff;
+      --text:    #e6edf3;
+      --text2:   #8b949e;
+      --text3:   #4d5f70;
+      --font:    'Inter', sans-serif;
+      --font2:   'Space Grotesk', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ====== NAV ====== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 5%; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(8,12,18,0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: var(--font2); font-size: 1.05rem; font-weight: 700; }
+    .nav-logo span { color: var(--accent); }
+    .nav-back { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text2); transition: color 0.2s; }
+    .nav-back:hover { color: var(--text); }
+
+    /* ====== HERO ====== */
+    #hero {
+      min-height: 52vh; display: flex; align-items: flex-end;
+      padding: 100px 5% 60px; position: relative; overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #0a0518 0%, #0d0d1a 40%, #050c12 100%); }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(123,47,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(123,47,255,0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      mask-image: radial-gradient(ellipse 90% 70% at 30% 50%, black 20%, transparent 80%);
+    }
+    .hero-glow { position: absolute; width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(123,47,255,0.12) 0%, transparent 70%); top: 50%; left: 10%; transform: translate(-20%, -50%); }
+    .hero-content { position: relative; z-index: 1; max-width: 760px; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text3); margin-bottom: 1.4rem; }
+    .breadcrumb a { color: var(--text3); transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--text2); }
+    .project-type {
+      display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px;
+      border: 1px solid rgba(123,47,255,0.3); border-radius: 100px; font-size: 0.76rem;
+      color: var(--purple2); background: rgba(123,47,255,0.08); margin-bottom: 1.2rem;
+      font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .hero-title { font-family: var(--font2); font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+    .hero-desc { font-size: 1rem; color: var(--text2); max-width: 560px; line-height: 1.7; margin-bottom: 2rem; }
+    .hero-meta { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+    .meta-value { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+
+    /* ====== SECTIONS ====== */
+    section { padding: 80px 5%; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section-label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple2); margin-bottom: 0.5rem; }
+    .section-title { font-family: var(--font2); font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2.5rem; }
+
+    /* ====== STACK ====== */
+    #stack { background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .stack-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); font-size: 0.86rem; font-weight: 500; transition: border-color 0.2s; }
+    .pill:hover { border-color: var(--purple); }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ====== CONTEXTE ====== */
+    #context { border-bottom: 1px solid var(--border); }
+    .context-intro { font-size: 0.97rem; color: var(--text2); line-height: 1.8; margin-bottom: 2rem; max-width: 820px; }
+    .context-intro strong { color: var(--text); }
+    .context-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .context-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; }
+    .context-card-icon { font-size: 1.5rem; margin-bottom: 0.8rem; }
+    .context-card-title { font-weight: 700; font-size: 0.92rem; margin-bottom: 0.5rem; }
+    .context-card-text { font-size: 0.84rem; color: var(--text2); line-height: 1.6; }
+
+    /* ====== FONCTIONNALITÉS ====== */
+    #features { background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .features-list { display: flex; flex-direction: column; gap: 1rem; }
+    .feature-item {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1.2rem;
+      transition: border-color 0.2s;
+    }
+    .feature-item:hover { border-color: var(--purple); }
+    .feature-num { font-family: var(--font2); font-size: 1.4rem; font-weight: 700; color: var(--purple2); opacity: 0.5; flex-shrink: 0; min-width: 36px; }
+    .feature-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; }
+    .feature-desc { font-size: 0.84rem; color: var(--text2); line-height: 1.6; }
+    .feature-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.7rem; }
+    .ftag { padding: 3px 9px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; background: rgba(123,47,255,0.1); color: var(--purple2); border: 1px solid rgba(123,47,255,0.2); }
+
+    /* ====== CODE ====== */
+    #code-samples { border-bottom: 1px solid var(--border); }
+    .code-block { background: #0d1117; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 1.6rem; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--card); border-bottom: 1px solid var(--border); }
+    .code-title { font-size: 0.82rem; font-weight: 600; color: var(--text2); }
+    .code-lang { padding: 3px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; background: rgba(123,47,255,0.1); color: var(--purple2); border: 1px solid rgba(123,47,255,0.2); }
+    .code-body { padding: 1.4rem 1.6rem; overflow-x: auto; }
+    .code-body pre { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; font-size: 0.83rem; line-height: 1.75; color: #cdd9e5; white-space: pre; }
+
+    /* ====== STATS ====== */
+    #stats { background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; text-align: center; }
+    .stat-value { font-family: var(--font2); font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, var(--purple), var(--purple2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: 0.8rem; color: var(--text2); margin-top: 6px; }
+
+    /* ====== CTA ====== */
+    #cta { text-align: center; }
+    .cta-title { font-family: var(--font2); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; margin-bottom: 0.8rem; }
+    .cta-desc { color: var(--text2); margin-bottom: 2rem; font-size: 0.95rem; }
+    .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { padding: 12px 26px; background: var(--purple); color: #fff; border-radius: 8px; font-weight: 700; font-size: 0.88rem; transition: opacity 0.2s, transform 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-ghost { padding: 12px 26px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 0.88rem; transition: border-color 0.2s, transform 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-ghost:hover { border-color: var(--text3); transform: translateY(-2px); }
+
+    /* ====== FOOTER ====== */
+    footer { border-top: 1px solid var(--border); padding: 2rem 5%; text-align: center; font-size: 0.8rem; color: var(--text3); }
+    footer span { color: var(--text2); }
+
+    /* ====== FADE IN ====== */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 640px) { .context-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">JB<span>.</span></div>
+    <a href="index.html" class="nav-back">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Retour au portfolio
+    </a>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <div class="breadcrumb">
+        <a href="index.html">Portfolio</a>
+        <span>/</span>
+        <span>Discogs Scraper</span>
+      </div>
+      <div class="project-type">🎵 Projet Python & Automatisation</div>
+      <h1 class="hero-title">Discogs — Web Scraping<br/>de données musicales</h1>
+      <p class="hero-desc">
+        Pipeline de scraping asynchrone pour extraire et enrichir des données musicales
+        depuis Discogs : albums, artistes, genres, notations et prix sur des milliers d'entrées.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Type</span>
+          <span class="meta-value">Projet collaboratif</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Stack</span>
+          <span class="meta-value">Python · BeautifulSoup · crawl4ai</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Output</span>
+          <span class="meta-value">~10 000 albums</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">GitHub</span>
+          <span class="meta-value"><a href="https://github.com/jeanlisek/Python-Scrapping-Project-DISCOGS" target="_blank" style="color:var(--purple2);text-decoration:underline;">Voir le repo ↗</a></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== STACK ====== -->
+  <section id="stack">
+    <div class="container">
+      <div class="section-label fade-in">Technologies</div>
+      <h2 class="section-title fade-in">Stack technique</h2>
+      <div class="stack-pills fade-in">
+        <div class="pill"><div class="pill-dot" style="background:#7b2fff"></div>Python</div>
+        <div class="pill"><div class="pill-dot" style="background:#00d4ff"></div>BeautifulSoup4</div>
+        <div class="pill"><div class="pill-dot" style="background:#a855f7"></div>crawl4ai</div>
+        <div class="pill"><div class="pill-dot" style="background:#f0b429"></div>asyncio</div>
+        <div class="pill"><div class="pill-dot" style="background:#00d4ff"></div>CSV Export</div>
+        <div class="pill"><div class="pill-dot" style="background:#7b2fff"></div>Data Cleaning</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CONTEXTE ====== -->
+  <section id="context">
+    <div class="container">
+      <div class="section-label fade-in">Contexte</div>
+      <h2 class="section-title fade-in">Pourquoi ce projet ?</h2>
+      <p class="context-intro fade-in">
+        Projet collaboratif développé pour explorer la <strong>collecte automatisée de données</strong>
+        à grande échelle. Discogs est l'une des bases musicales les plus riches du web —
+        un terrain idéal pour pratiquer le scraping asynchrone, la gestion d'erreurs robuste
+        et le nettoyage de données réelles, imparfaites et volumineuses.
+      </p>
+      <div class="context-grid fade-in">
+        <div class="context-card">
+          <div class="context-card-icon">🎯</div>
+          <div class="context-card-title">Objectif</div>
+          <p class="context-card-text">Construire un pipeline complet d'extraction : de la collecte brute à l'enrichissement des données, jusqu'à l'export structuré prêt à analyser.</p>
+        </div>
+        <div class="context-card">
+          <div class="context-card-icon">🌐</div>
+          <div class="context-card-title">Source</div>
+          <p class="context-card-text">Discogs.com — catalogue de 200+ pages couvrant des milliers d'albums avec artistes, labels, formats, genres et données de marché.</p>
+        </div>
+        <div class="context-card">
+          <div class="context-card-icon">⚡</div>
+          <div class="context-card-title">Approche technique</div>
+          <p class="context-card-text">Scraping asynchrone avec rendu JavaScript, système de retry automatique, rate limiting respectueux et backups intermédiaires.</p>
+        </div>
+        <div class="context-card">
+          <div class="context-card-icon">💡</div>
+          <div class="context-card-title">Compétences</div>
+          <p class="context-card-text">Gestion de données massives, nettoyage et normalisation, architecture pipeline, robustesse face aux erreurs réseau et aux anti-bots.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FONCTIONNALITÉS ====== -->
+  <section id="features">
+    <div class="container">
+      <div class="section-label fade-in">Pipeline</div>
+      <h2 class="section-title fade-in">Ce que fait le scraper</h2>
+      <div class="features-list">
+        <div class="feature-item fade-in">
+          <div class="feature-num">01</div>
+          <div>
+            <div class="feature-title">Collecte du catalogue</div>
+            <p class="feature-desc">Parcours des 200 pages du catalogue Discogs. Extraction des noms d'artistes, titres d'albums et URLs pour chaque entrée — jusqu'à ~10 000 albums.</p>
+            <div class="feature-tags"><span class="ftag">crawl4ai</span><span class="ftag">asyncio</span><span class="ftag">Pagination</span></div>
+          </div>
+        </div>
+        <div class="feature-item fade-in">
+          <div class="feature-num">02</div>
+          <div>
+            <div class="feature-title">Enrichissement des données</div>
+            <p class="feature-desc">Visite de chaque page album pour récupérer labels, formats, dates de sortie, genres, nombre de collections, notes et prix du marché.</p>
+            <div class="feature-tags"><span class="ftag">BeautifulSoup</span><span class="ftag">HTML Parsing</span><span class="ftag">Multi-tables</span></div>
+          </div>
+        </div>
+        <div class="feature-item fade-in">
+          <div class="feature-num">03</div>
+          <div>
+            <div class="feature-title">Robustesse & anti-détection</div>
+            <p class="feature-desc">Retry automatique (3 tentatives), délais aléatoires entre requêtes (2-5s), version "safe" avec timeouts étendus pour les IPs signalées.</p>
+            <div class="feature-tags"><span class="ftag">Rate Limiting</span><span class="ftag">Retry Logic</span><span class="ftag">Anti-bot</span></div>
+          </div>
+        </div>
+        <div class="feature-item fade-in">
+          <div class="feature-num">04</div>
+          <div>
+            <div class="feature-title">Nettoyage & export</div>
+            <p class="feature-desc">Normalisation automatique : suppression des parenthèses, décodage HTML, standardisation des formats. Export en CSV avec backups tous les 50 albums.</p>
+            <div class="feature-tags"><span class="ftag">Data Cleaning</span><span class="ftag">CSV</span><span class="ftag">Regex</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CODE ====== -->
+  <section id="code-samples">
+    <div class="container">
+      <div class="section-label fade-in">Extraits de code</div>
+      <h2 class="section-title fade-in">Quelques exemples</h2>
+
+      <div class="code-block fade-in">
+        <div class="code-header">
+          <span class="code-title">Scraping asynchrone d'une page catalogue</span>
+          <span class="code-lang">Python</span>
+        </div>
+        <div class="code-body">
+<pre>async def scrape_catalog_page(crawler, page_num):
+    url = f"https://www.discogs.com/search/?page={page_num}"
+    result = await crawler.arun(url=url)
+
+    soup = BeautifulSoup(result.html, "html.parser")
+    albums = []
+
+    for item in soup.select(".card_release"):
+        title  = item.select_one(".card_title").get_text(strip=True)
+        artist = item.select_one(".card_artist").get_text(strip=True)
+        link   = item.select_one("a")["href"]
+        albums.append({"title": title, "artist": artist, "url": link})
+
+    return albums</pre>
+        </div>
+      </div>
+
+      <div class="code-block fade-in">
+        <div class="code-header">
+          <span class="code-title">Retry automatique avec délai aléatoire</span>
+          <span class="code-lang">Python</span>
+        </div>
+        <div class="code-body">
+<pre>async def fetch_with_retry(crawler, url, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            result = await crawler.arun(url=url)
+            if result.success:
+                return result
+        except Exception as e:
+            wait = random.uniform(2, 5)
+            print(f"Tentative {attempt+1} échouée. Retry dans {wait:.1f}s")
+            await asyncio.sleep(wait)
+    return None</pre>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ====== STATS ====== -->
+  <section id="stats">
+    <div class="container">
+      <div class="section-label fade-in">Résultats</div>
+      <h2 class="section-title fade-in">Ce que le pipeline produit</h2>
+      <div class="stats-grid fade-in">
+        <div class="stat-card">
+          <div class="stat-value">10K+</div>
+          <div class="stat-label">Albums scrapés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">200</div>
+          <div class="stat-label">Pages catalogue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Champs enrichis par album</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">CSV</div>
+          <div class="stat-label">Format d'export structuré</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CTA ====== -->
+  <section id="cta">
+    <div class="container">
+      <h2 class="cta-title fade-in">Voir le code source</h2>
+      <p class="cta-desc fade-in">Le projet complet est disponible sur GitHub.</p>
+      <div class="cta-buttons fade-in">
+        <a href="https://github.com/jeanlisek/Python-Scrapping-Project-DISCOGS" target="_blank" class="btn-primary">
+          Voir sur GitHub
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
+        <a href="index.html" class="btn-ghost">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Retour au portfolio
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Conçu &amp; développé par <span>Jude Buyikana</span> · 2025</p>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
