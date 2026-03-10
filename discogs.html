@@ -145,11 +145,71 @@
     footer { border-top: 1px solid var(--border); padding: 2rem 5%; text-align: center; font-size: 0.8rem; color: var(--text3); }
     footer span { color: var(--text2); }
 
+    /* ====== GALERIE ====== */
+    #gallery { border-bottom: 1px solid var(--border); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .gallery-item {
+      border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer; position: relative;
+      aspect-ratio: 16/10;
+      background: var(--card);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .gallery-item:hover { border-color: var(--purple); transform: translateY(-4px); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item .gallery-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay-icon { color: #fff; font-size: 1.8rem; }
+    .gallery-caption {
+      font-size: 0.76rem; color: var(--text3);
+      padding: 8px 10px; text-align: center;
+      background: var(--card); border-top: 1px solid var(--border);
+    }
+
+    /* ====== LIGHTBOX ====== */
+    #lightbox {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 10px; box-shadow: 0 0 60px rgba(123,47,255,0.25); }
+    .lb-close {
+      position: absolute; top: 24px; right: 32px;
+      font-size: 2rem; color: #fff; cursor: pointer; line-height: 1;
+      opacity: 0.7; transition: opacity 0.2s;
+    }
+    .lb-close:hover { opacity: 1; }
+    .lb-prev, .lb-next {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      font-size: 2.5rem; color: #fff; cursor: pointer;
+      opacity: 0.5; transition: opacity 0.2s; user-select: none;
+    }
+    .lb-prev:hover, .lb-next:hover { opacity: 1; }
+    .lb-prev { left: 24px; }
+    .lb-next { right: 24px; }
+    .lb-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--text3); }
+
     /* ====== FADE IN ====== */
     .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-    @media (max-width: 640px) { .context-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) {
+      .context-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -176,8 +236,10 @@
       <div class="project-type">🎵 Projet Python & Automatisation</div>
       <h1 class="hero-title">Discogs — Web Scraping<br/>de données musicales</h1>
       <p class="hero-desc">
-        Pipeline de scraping asynchrone pour extraire et enrichir des données musicales
-        depuis Discogs : albums, artistes, genres, notations et prix sur des milliers d'entrées.
+        <strong style="color:var(--text)">Discogs</strong> est la plus grande base de données musicale communautaire au monde —
+        un Wikipedia du disque où des millions de collectionneurs cataloguent, achètent et vendent
+        leurs vinyles, CDs et cassettes avec des cotes de marché en temps réel.
+        Ce projet extrait et enrichit ces données à grande échelle via un pipeline Python asynchrone.
       </p>
       <div class="hero-meta">
         <div class="meta-item">
@@ -350,6 +412,53 @@
     </div>
   </section>
 
+  <!-- ====== GALERIE ====== -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-label fade-in">Présentation</div>
+      <h2 class="section-title fade-in">Les slides du projet</h2>
+      <div class="gallery-grid fade-in">
+
+        <div class="gallery-item" onclick="openLightbox(0)">
+          <img src="assets/discogs-cover.png" alt="Cover — Scraping et Analyse Discogs" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Présentation du projet</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(1)">
+          <img src="assets/discogs-donnees.png" alt="Les données cibles" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Les données cibles</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(2)">
+          <img src="assets/discogs-logique.png" alt="La Logique du Scraping" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">La logique du scraping</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(3)">
+          <img src="assets/discogs-albums.png" alt="Pochettes albums" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Pochettes d'albums</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(4)">
+          <img src="assets/discogs-formats.png" alt="Format Dominant" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Format dominant</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(5)">
+          <img src="assets/discogs-prix.png" alt="Accessibilité du matérialisme musical" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Accessibilité du matérialisme musical</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ====== STATS ====== -->
   <section id="stats">
     <div class="container">
@@ -386,6 +495,10 @@
           Voir sur GitHub
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
         </a>
+        <a href="https://www.canva.com/design/DAG2hBBsOmc/PEy4DZTETXsnwwN7Aadq-Q/edit" target="_blank" class="btn-ghost">
+          Voir la présentation
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
         <a href="index.html" class="btn-ghost">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Retour au portfolio
@@ -398,11 +511,60 @@
     <p>Conçu &amp; développé par <span>Jude Buyikana</span> · 2025</p>
   </footer>
 
+  <!-- ====== LIGHTBOX ====== -->
+  <div id="lightbox">
+    <span class="lb-close" onclick="closeLightbox()">✕</span>
+    <span class="lb-prev" onclick="lbMove(-1)">‹</span>
+    <img id="lb-img" src="" alt="" />
+    <span class="lb-next" onclick="lbMove(1)">›</span>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
+
   <script>
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.1 });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Lightbox
+    const slides = [
+      { src: 'assets/discogs-cover.png',   alt: 'Présentation du projet' },
+      { src: 'assets/discogs-donnees.png', alt: 'Les données cibles' },
+      { src: 'assets/discogs-logique.png', alt: 'La logique du scraping' },
+      { src: 'assets/discogs-albums.png',  alt: 'Pochettes d\'albums' },
+      { src: 'assets/discogs-formats.png', alt: 'Format dominant' },
+      { src: 'assets/discogs-prix.png',    alt: 'Accessibilité du matérialisme musical' },
+    ];
+    let currentSlide = 0;
+
+    function openLightbox(index) {
+      currentSlide = index;
+      updateLightbox();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function lbMove(dir) {
+      currentSlide = (currentSlide + dir + slides.length) % slides.length;
+      updateLightbox();
+    }
+    function updateLightbox() {
+      const s = slides[currentSlide];
+      document.getElementById('lb-img').src = s.src;
+      document.getElementById('lb-img').alt = s.alt;
+      document.getElementById('lb-counter').textContent = (currentSlide + 1) + ' / ' + slides.length;
+    }
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) closeLightbox();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbMove(1);
+      if (e.key === 'ArrowLeft') lbMove(-1);
+    });
   </script>
 </body>
 </html>
