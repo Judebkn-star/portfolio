@@ -402,6 +402,101 @@
       border: 1px solid rgba(232,0,61,0.2);
     }
 
+    /* ====== DASHBOARDS GALLERY ====== */
+    #dashboards {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dashboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .dashboard-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dashboard-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .dashboard-num {
+      font-family: var(--font2);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--red);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .dashboard-title {
+      font-family: var(--font2);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .dashboard-desc {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.65;
+      max-width: 720px;
+    }
+
+    .dashboard-img-wrap {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: zoom-in;
+    }
+
+    .dashboard-img-wrap:hover {
+      border-color: var(--red);
+      transform: translateY(-3px);
+    }
+
+    .dashboard-img-wrap img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 95vw;
+      max-height: 90vh;
+      border-radius: 10px;
+      box-shadow: 0 0 80px rgba(0,0,0,0.8);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 1.2rem; right: 1.4rem;
+      font-size: 1.6rem;
+      color: var(--text2);
+      cursor: pointer;
+      line-height: 1;
+    }
+    .lightbox-close:hover { color: var(--text); }
+
     /* ====== INSIGHTS ====== */
     #insights {
       border-bottom: 1px solid var(--border);
@@ -760,6 +855,75 @@ ORDER BY saison DESC, duree_moy_sec ASC;</pre>
     </div>
   </section>
 
+  <!-- ====== DASHBOARDS ====== -->
+  <section id="dashboards">
+    <div class="container">
+      <div class="section-label fade-in">Visualisations</div>
+      <h2 class="section-title fade-in">Dashboards Tableau</h2>
+
+      <div class="dashboard-list">
+
+        <!-- Dashboard 1 -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-meta">
+            <div>
+              <div class="dashboard-num">Dashboard 01</div>
+              <div class="dashboard-title">75 ans de Formule 1 — L'Histoire en chiffres</div>
+            </div>
+          </div>
+          <p class="dashboard-desc">
+            Vue d'ensemble historique : 1 128 Grand Prix, 75 saisons, 841 pilotes, 212 constructeurs.
+            Répartition géographique des pilotes, évolution du calendrier, top pilotes et constructeurs all-time.
+          </p>
+          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-histoire.png')">
+            <img src="assets/dashboard-histoire.png" alt="Dashboard 75 ans de F1" loading="lazy" />
+          </div>
+        </div>
+
+        <!-- Dashboard 2 -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-meta">
+            <div>
+              <div class="dashboard-num">Dashboard 02</div>
+              <div class="dashboard-title">Décennies, Domination &amp; Stratégie</div>
+            </div>
+          </div>
+          <p class="dashboard-desc">
+            Analyse des cycles de domination par décennie et par constructeur.
+            Carte des circuits, victoires par nationalité, parcours des pilotes et ADN stratégique des circuits.
+          </p>
+          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-decennies.png')">
+            <img src="assets/dashboard-decennies.png" alt="Dashboard Décennies et Domination" loading="lazy" />
+          </div>
+        </div>
+
+        <!-- Dashboard 3 -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-meta">
+            <div>
+              <div class="dashboard-num">Dashboard 03</div>
+              <div class="dashboard-title">Pit Stops &amp; Stratégie — Les Secondes qui Font la Course</div>
+            </div>
+          </div>
+          <p class="dashboard-desc">
+            Étude approfondie des stratégies d'arrêt : durée moyenne par écurie, fenêtre optimale (tours 21-30),
+            corrélation entre nombre d'arrêts et position finale, scatter podiums vs victoires.
+          </p>
+          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-pitstops.png')">
+            <img src="assets/dashboard-pitstops.png" alt="Dashboard Pit Stops et Stratégie" loading="lazy" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
   <!-- ====== INSIGHTS ====== -->
   <section id="insights">
     <div class="container">
@@ -817,6 +981,17 @@ ORDER BY saison DESC, duree_moy_sec ASC;</pre>
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
   </script>
 </body>
 </html>
