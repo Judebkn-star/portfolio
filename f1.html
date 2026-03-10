@@ -274,6 +274,76 @@
       line-height: 1.6;
     }
 
+    /* ====== CONTEXT INTRO ====== */
+    .context-intro {
+      font-size: 0.97rem;
+      color: var(--text2);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      max-width: 820px;
+    }
+    .context-intro strong { color: var(--text); }
+
+    /* ====== CODE BLOCKS ====== */
+    #code-samples {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.6rem;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text2);
+    }
+
+    .code-lang {
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(232,0,61,0.1);
+      color: var(--red);
+      border: 1px solid rgba(232,0,61,0.2);
+    }
+
+    .code-body {
+      padding: 1.4rem 1.6rem;
+      overflow-x: auto;
+    }
+
+    .code-body pre {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--text2);
+      white-space: pre;
+    }
+
+    /* SQL syntax highlight */
+    .kw  { color: #ff7b72; font-weight: 600; }   /* keywords */
+    .fn  { color: #d2a8ff; }                      /* functions */
+    .str { color: #a5d6ff; }                      /* strings/aliases */
+    .cm  { color: #4d5f70; font-style: italic; }  /* comments */
+    .num { color: #79c0ff; }                      /* numbers */
+
     /* ====== ANALYSES ====== */
     #analyses {
       background: var(--bg2);
@@ -481,14 +551,15 @@
       <h1 class="hero-title">Analyse Formula 1<br/>— 70 ans de données</h1>
 
       <p class="hero-desc">
-        Exploration et analyse d'une base de données Formula 1 couvrant 70 ans de compétition :
-        pilotes, constructeurs, pit stops, qualifications et stratégies de course.
+        Projet personnel né d'une passion pour la F1 et les données. Un terrain d'entraînement
+        idéal pour pratiquer le SQL avancé, la modélisation et le storytelling data
+        sur un dataset riche, concret et historiquement chargé.
       </p>
 
       <div class="hero-meta">
         <div class="meta-item">
-          <span class="meta-label">Durée</span>
-          <span class="meta-value">En cours</span>
+          <span class="meta-label">Type</span>
+          <span class="meta-value">Projet personnel</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Données</span>
@@ -496,11 +567,11 @@
         </div>
         <div class="meta-item">
           <span class="meta-label">Stack</span>
-          <span class="meta-value">SQL · Python · Dashboard</span>
+          <span class="meta-value">SQL · Python · Tableau</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Type</span>
-          <span class="meta-value">Analyse exploratoire</span>
+          <span class="meta-label">Objectif</span>
+          <span class="meta-value">Montée en compétence</span>
         </div>
       </div>
     </div>
@@ -514,11 +585,10 @@
       <div class="stack-pills fade-in">
         <div class="pill"><div class="pill-dot" style="background:#00d4ff"></div>SQLite</div>
         <div class="pill"><div class="pill-dot" style="background:#7b2fff"></div>Python</div>
-        <div class="pill"><div class="pill-dot" style="background:#e8003d"></div>Pandas</div>
+        <div class="pill"><div class="pill-dot" style="background:#e8003d"></div>Tableau</div>
         <div class="pill"><div class="pill-dot" style="background:#f0b429"></div>SQL Avancé</div>
         <div class="pill"><div class="pill-dot" style="background:#00d4ff"></div>CTEs &amp; Window Functions</div>
         <div class="pill"><div class="pill-dot" style="background:#7b2fff"></div>Data Storytelling</div>
-        <div class="pill"><div class="pill-dot" style="background:#e8003d"></div>Dashboard HTML/JS</div>
       </div>
     </div>
   </section>
@@ -528,13 +598,22 @@
     <div class="container">
       <div class="section-label fade-in">Contexte</div>
       <h2 class="section-title fade-in">Pourquoi ce projet ?</h2>
+
+      <p class="context-intro fade-in">
+        Ce projet est avant tout un <strong>terrain de jeu personnel</strong> — la F1 est une passion, et quoi de mieux
+        qu'un sujet qu'on aime pour s'entraîner sérieusement ? L'idée : utiliser un dataset riche et complexe
+        pour pratiquer des compétences directement transférables en entreprise.
+        Modélisation relationnelle, requêtes SQL avancées, storytelling data, visualisation — tout y est.
+      </p>
+
       <div class="context-grid fade-in">
         <div class="context-card">
           <div class="context-card-icon">🎯</div>
-          <div class="context-card-title">Objectif</div>
+          <div class="context-card-title">Démarche stratégique</div>
           <p class="context-card-text">
-            Démontrer des compétences en SQL avancé, analyse de données complexes
-            et data storytelling à travers un dataset riche et concret.
+            Chaque analyse répond à une vraie question business : quels facteurs expliquent
+            la domination d'une écurie ? Comment mesurer l'impact d'une stratégie pit stop
+            sur le résultat final ?
           </p>
         </div>
         <div class="context-card">
@@ -542,23 +621,24 @@
           <div class="context-card-title">Dataset</div>
           <p class="context-card-text">
             Base de données SQLite multi-tables : courses, pilotes, constructeurs,
-            résultats, pit stops, qualifications, classements.
+            résultats, pit stops, qualifications, classements — plus de 500 000 lignes croisées.
           </p>
         </div>
         <div class="context-card">
           <div class="context-card-icon">🔍</div>
-          <div class="context-card-title">Approche</div>
+          <div class="context-card-title">Approche analytique</div>
           <p class="context-card-text">
-            Analyse exploratoire avec SQL, récits narratifs sur les données,
-            et visualisations interactives pour raconter l'histoire de la F1.
+            SQL d'abord pour explorer et modéliser, Python pour aller plus loin,
+            puis mise en récit des données pour rendre les insights accessibles
+            à un public non-technique.
           </p>
         </div>
         <div class="context-card">
           <div class="context-card-icon">💡</div>
-          <div class="context-card-title">Valeur</div>
+          <div class="context-card-title">Compétences exercées</div>
           <p class="context-card-text">
-            Transformer 70 ans de données brutes en insights lisibles :
-            dominations, records, évolutions tactiques, facteurs de victoire.
+            CTEs, window functions, jointures multi-tables, agrégations conditionnelles,
+            détection de tendances, corrélation — dans un contexte concret et engageant.
           </p>
         </div>
       </div>
@@ -623,6 +703,67 @@
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ====== CODE SAMPLES ====== -->
+  <section id="code-samples">
+    <div class="container">
+      <div class="section-label fade-in">Extraits de code</div>
+      <h2 class="section-title fade-in">Quelques requêtes SQL</h2>
+
+      <!-- Extrait 1 -->
+      <div class="code-block fade-in">
+        <div class="code-header">
+          <span class="code-title">Top 10 pilotes — victoires cumulées sur toute la carrière</span>
+          <span class="code-lang">SQL</span>
+        </div>
+        <div class="code-body">
+<pre><span class="cm">-- Classement des pilotes par nombre de victoires totales</span>
+<span class="kw">SELECT</span>
+    d.forename || <span class="str">' '</span> || d.surname   <span class="kw">AS</span> <span class="str">pilote</span>,
+    <span class="fn">COUNT</span>(r.resultId)               <span class="kw">AS</span> <span class="str">victoires</span>,
+    <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> <span class="fn">COUNT</span>(r.resultId) <span class="kw">DESC</span>
+    )                               <span class="kw">AS</span> <span class="str">classement</span>
+
+<span class="kw">FROM</span> results r
+<span class="kw">JOIN</span> drivers d   <span class="kw">ON</span> r.driverId   = d.driverId
+<span class="kw">WHERE</span> r.position = <span class="num">1</span>
+<span class="kw">GROUP BY</span> d.driverId
+<span class="kw">ORDER BY</span> victoires <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">10</span>;</pre>
+        </div>
+      </div>
+
+      <!-- Extrait 2 -->
+      <div class="code-block fade-in">
+        <div class="code-header">
+          <span class="code-title">Analyse des pit stops — temps moyen par écurie et par saison</span>
+          <span class="code-lang">SQL</span>
+        </div>
+        <div class="code-body">
+<pre><span class="cm">-- CTE : durée moyenne des pit stops par constructeur</span>
+<span class="kw">WITH</span> <span class="str">pit_perf</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        con.name                        <span class="kw">AS</span> <span class="str">ecurie</span>,
+        ra.year                         <span class="kw">AS</span> <span class="str">saison</span>,
+        <span class="fn">ROUND</span>(<span class="fn">AVG</span>(ps.milliseconds) / <span class="num">1000.0</span>, <span class="num">2</span>) <span class="kw">AS</span> <span class="str">duree_moy_sec</span>,
+        <span class="fn">COUNT</span>(*)                        <span class="kw">AS</span> <span class="str">nb_arrets</span>
+    <span class="kw">FROM</span> pit_stops ps
+    <span class="kw">JOIN</span> results   re  <span class="kw">ON</span> ps.raceId   = re.raceId
+                      <span class="kw">AND</span> ps.driverId = re.driverId
+    <span class="kw">JOIN</span> constructors con <span class="kw">ON</span> re.constructorId = con.constructorId
+    <span class="kw">JOIN</span> races ra          <span class="kw">ON</span> ps.raceId = ra.raceId
+    <span class="kw">GROUP BY</span> con.name, ra.year
+)
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span>  <span class="str">pit_perf</span>
+<span class="kw">WHERE</span> nb_arrets &gt; <span class="num">10</span>
+<span class="kw">ORDER BY</span> saison <span class="kw">DESC</span>, duree_moy_sec <span class="kw">ASC</span>;</pre>
+        </div>
+      </div>
+
     </div>
   </section>
 
