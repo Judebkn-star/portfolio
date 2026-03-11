@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayFit Hackathon — Eugenia · Jude Buyikana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #05080f;
+      --bg2:     #090d18;
+      --bg3:     #0d1220;
+      --card:    #111827;
+      --border:  #1e2d45;
+      --blue:    #3b6ff5;
+      --blue2:   #6b96ff;
+      --text:    #eef2ff;
+      --text2:   #8899bb;
+      --text3:   #445069;
+      --font:    'Inter', sans-serif;
+      --font2:   'Space Grotesk', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.6; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ====== NAV ====== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 5%; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(5,8,15,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: var(--font2); font-size: 1.05rem; font-weight: 700; }
+    .nav-logo span { color: var(--blue2); }
+    .nav-back { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text2); transition: color 0.2s; }
+    .nav-back:hover { color: var(--text); }
+
+    /* ====== HERO ====== */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 100px 5% 80px;
+      position: relative; overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 40%, rgba(59,111,245,0.14) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 70%, rgba(107,150,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1100px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    .hero-kicker {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(59,111,245,0.1); border: 1px solid rgba(59,111,245,0.25);
+      border-radius: 100px; padding: 6px 14px;
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em;
+      color: var(--blue2); text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hero-kicker::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue2);
+      animation: pulse-blue 2s ease-in-out infinite;
+    }
+    @keyframes pulse-blue {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+    .hero-title {
+      font-family: var(--font2); font-size: clamp(2.4rem, 5vw, 3.6rem);
+      font-weight: 700; line-height: 1.1; margin-bottom: 20px;
+    }
+    .hero-title .highlight { color: var(--blue2); }
+    .hero-desc {
+      font-size: 1.05rem; color: var(--text2); line-height: 1.8;
+      max-width: 500px; margin-bottom: 36px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--blue); color: #fff;
+      padding: 12px 24px; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--blue2); transform: translateY(-2px); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text2); padding: 12px 24px; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 500; transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--blue); color: var(--text); }
+
+    .hero-meta {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .meta-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px;
+    }
+    .meta-card-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text3); margin-bottom: 8px;
+    }
+    .meta-card-value { font-size: 0.95rem; color: var(--text2); line-height: 1.6; }
+    .meta-card-value strong { color: var(--text); }
+
+    /* ====== CONTAINER ====== */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 5%; }
+
+    /* ====== SECTIONS ====== */
+    section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+    section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue2); margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: var(--font2); font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700; line-height: 1.2; margin-bottom: 28px;
+    }
+
+    /* ====== GOLDEN CIRCLE ====== */
+    .golden-circle-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--border); border-radius: 12px; overflow: hidden;
+      margin-top: 32px;
+    }
+    .gc-item {
+      background: var(--card); padding: 32px 28px;
+    }
+    .gc-item:first-child { border-radius: 12px 0 0 12px; }
+    .gc-item:last-child { border-radius: 0 12px 12px 0; }
+    .gc-number {
+      font-family: var(--font2); font-size: 2rem; font-weight: 800;
+      color: var(--blue); opacity: 0.4; margin-bottom: 4px;
+    }
+    .gc-question {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--blue2); margin-bottom: 12px;
+    }
+    .gc-answer { font-size: 0.9rem; color: var(--text2); line-height: 1.7; }
+    .gc-answer strong { color: var(--text); }
+
+    /* ====== CONTEXTE / TIMELINE ====== */
+    .timeline {
+      position: relative; padding-left: 28px; margin-top: 32px;
+    }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+      width: 2px; background: linear-gradient(to bottom, var(--blue), transparent);
+    }
+    .timeline-item {
+      position: relative; margin-bottom: 32px;
+    }
+    .timeline-item::before {
+      content: ''; position: absolute; left: -34px; top: 6px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--blue); border: 2px solid var(--bg);
+    }
+    .timeline-title {
+      font-family: var(--font2); font-size: 1rem; font-weight: 600;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .timeline-desc { font-size: 0.9rem; color: var(--text2); line-height: 1.7; }
+
+    /* ====== STACK ====== */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; margin-top: 28px;
+    }
+    .stack-chip {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .stack-chip-icon { font-size: 1.3rem; }
+    .stack-chip-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .stack-chip-role { font-size: 0.75rem; color: var(--text3); }
+
+    /* ====== LIVRABLES ====== */
+    .livrables-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 32px;
+    }
+    .livrable-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px; position: relative; overflow: hidden;
+    }
+    .livrable-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: linear-gradient(to right, var(--blue), var(--blue2));
+    }
+    .livrable-num {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--blue2); margin-bottom: 10px;
+    }
+    .livrable-title {
+      font-family: var(--font2); font-size: 1rem; font-weight: 600;
+      color: var(--text); margin-bottom: 10px;
+    }
+    .livrable-desc { font-size: 0.88rem; color: var(--text2); line-height: 1.7; }
+    .livrable-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 14px; font-size: 0.82rem; color: var(--blue2);
+      font-weight: 500; transition: color 0.2s;
+    }
+    .livrable-link:hover { color: var(--text); }
+
+    /* ====== ARTICLES SEO ====== */
+    .articles-list {
+      display: flex; flex-direction: column; gap: 16px; margin-top: 28px;
+    }
+    .article-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 22px 24px;
+      display: flex; align-items: flex-start; gap: 18px;
+    }
+    .article-icon {
+      width: 42px; height: 42px; flex-shrink: 0;
+      background: rgba(59,111,245,0.12); border: 1px solid rgba(59,111,245,0.2);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+    .article-meta { flex: 1; }
+    .article-kw {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--blue2); margin-bottom: 4px;
+    }
+    .article-title-text {
+      font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px;
+    }
+    .article-extract { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+
+    /* ====== AGENTS ====== */
+    .agents-flow {
+      display: flex; flex-direction: column; gap: 0; margin-top: 32px;
+    }
+    .agent-node {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 28px; position: relative;
+    }
+    .agent-parent {
+      border-color: rgba(59,111,245,0.4);
+      background: linear-gradient(135deg, rgba(59,111,245,0.07), var(--card));
+    }
+    .agent-connector {
+      width: 2px; height: 24px; background: var(--blue);
+      margin: 0 auto; opacity: 0.4;
+    }
+    .agent-children {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    .agent-child {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 20px;
+    }
+    .agent-name {
+      font-family: var(--font2); font-size: 0.9rem; font-weight: 700;
+      color: var(--blue2); margin-bottom: 6px;
+    }
+    .agent-role { font-size: 0.8rem; color: var(--text2); line-height: 1.6; }
+    .agent-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(59,111,245,0.1); border: 1px solid rgba(59,111,245,0.2);
+      color: var(--blue2); font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 6px; margin-bottom: 10px;
+    }
+
+    /* ====== PROMPT EXTRAIT ====== */
+    .prompt-block {
+      background: #060a12; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-top: 28px;
+    }
+    .prompt-header {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg3); border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+    }
+    .prompt-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .prompt-title { font-size: 0.8rem; color: var(--text3); font-family: monospace; margin-left: 8px; }
+    .prompt-body {
+      padding: 24px 28px;
+      font-family: 'Courier New', monospace; font-size: 0.82rem;
+      color: #a8c4ff; line-height: 1.8; overflow-x: auto;
+    }
+    .prompt-body .tag { color: #7b96ff; font-weight: 700; }
+    .prompt-body .comment { color: var(--text3); }
+    .prompt-body .string { color: #86efac; }
+    .prompt-body .value { color: var(--text2); }
+
+    /* ====== MOTS CLES ====== */
+    .keywords-grid {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px;
+    }
+    .kw-chip {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 16px;
+      font-size: 0.83rem; color: var(--text2);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .kw-chip:hover { border-color: var(--blue); color: var(--text); }
+    .kw-chip.top {
+      border-color: rgba(59,111,245,0.3);
+      color: var(--blue2); background: rgba(59,111,245,0.08);
+    }
+
+    /* ====== STATS ====== */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-top: 32px;
+    }
+    .stat-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 20px; text-align: center;
+    }
+    .stat-num {
+      font-family: var(--font2); font-size: 2rem; font-weight: 800;
+      color: var(--blue2); margin-bottom: 4px;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text2); }
+
+    /* ====== BENCHMARK ====== */
+    .bench-table {
+      width: 100%; border-collapse: collapse; margin-top: 28px;
+      font-size: 0.87rem;
+    }
+    .bench-table th {
+      text-align: left; padding: 12px 16px;
+      background: var(--bg3); color: var(--text3);
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; border-bottom: 1px solid var(--border);
+    }
+    .bench-table td {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      color: var(--text2); vertical-align: top;
+    }
+    .bench-table tr:last-child td { border-bottom: none; }
+    .bench-table td:first-child { color: var(--text); font-weight: 600; }
+    .bench-table tr:hover td { background: var(--bg3); }
+
+    /* ====== CTA FINAL ====== */
+    #cta {
+      padding: 100px 0;
+      text-align: center;
+      background: linear-gradient(to bottom, var(--bg2), var(--bg));
+    }
+    #cta .container { max-width: 640px; }
+    .cta-title {
+      font-family: var(--font2); font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700; margin-bottom: 16px;
+    }
+    .cta-sub { font-size: 1rem; color: var(--text2); margin-bottom: 36px; line-height: 1.7; }
+    .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ====== FADE-IN ====== */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      .hero-meta { flex-direction: row; flex-wrap: wrap; }
+      .meta-card { flex: 1; min-width: 200px; }
+      .golden-circle-grid { grid-template-columns: 1fr; }
+      .gc-item:first-child { border-radius: 12px 12px 0 0; }
+      .gc-item:last-child { border-radius: 0 0 12px 12px; }
+      .livrables-grid { grid-template-columns: 1fr; }
+      .agent-children { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      section { padding: 56px 0; }
+      .stack-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .bench-table { font-size: 0.8rem; }
+      .bench-table th, .bench-table td { padding: 10px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Jude<span>.</span></div>
+    <a href="index.html" class="nav-back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Retour au portfolio
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-kicker fade-in">Hackathon · PayFit · 2026</div>
+        <h1 class="hero-title fade-in">
+          Eugenia —<br/>
+          <span class="highlight">SEO IA</span><br/>
+          pour PayFit
+        </h1>
+        <p class="hero-desc fade-in">
+          Système multi-agents Dust pour automatiser la production de contenu SEO conforme aux enjeux juridiques RH. Veille légale, rédaction IA, simulateur Lovable — tout un écosystème construit en 48h.
+        </p>
+        <div class="hero-actions fade-in">
+          <a href="https://payfit-simu-landingpage.lovable.app" target="_blank" class="btn-primary">
+            Voir le simulateur live
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+          <a href="https://www.loom.com/share/e7e3e6ce95a04c9da4481d0e2c6f7349" target="_blank" class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Démo Loom
+          </a>
+        </div>
+      </div>
+      <div class="hero-meta fade-in">
+        <div class="meta-card">
+          <div class="meta-card-label">Contexte</div>
+          <div class="meta-card-value"><strong>Hackathon interne PayFit</strong> — challenge d'innovation SEO & IA sur 48h</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-label">Rôle</div>
+          <div class="meta-card-value"><strong>Stratégie IA, architecture agents, vibe coding Lovable</strong> — conception de bout en bout</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-card-label">Livrables clés</div>
+          <div class="meta-card-value"><strong>4 livrables</strong> — Golden Circle, benchmark, 3 articles SEO complets, simulateur fonctionnel</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOLDEN CIRCLE -->
+  <section id="strategie">
+    <div class="container">
+      <div class="section-label fade-in">Livrable 1 — Stratégie</div>
+      <h2 class="section-title fade-in">Golden Circle — La direction du projet</h2>
+      <p class="fade-in" style="font-size:0.95rem;color:var(--text2);line-height:1.8;max-width:700px;">
+        Avant toute mise en œuvre, on a posé les fondations. Un schéma de structuration pour aligner le jury sur la vision — <strong style="color:var(--text)">Pourquoi, Comment, Quoi</strong> — et éviter de partir dans des automatisations sans valeur.
+      </p>
+      <div class="golden-circle-grid fade-in">
+        <div class="gc-item">
+          <div class="gc-number">01</div>
+          <div class="gc-question">Pourquoi ?</div>
+          <div class="gc-answer">
+            Simplifier le déploiement des campagnes SEO tout en garantissant une <strong>conformité rigoureuse</strong> aux enjeux juridiques et opérationnels du secteur RH.
+          </div>
+        </div>
+        <div class="gc-item">
+          <div class="gc-number">02</div>
+          <div class="gc-question">Comment ?</div>
+          <div class="gc-answer">
+            <strong>Veille automatisée</strong> sur les évolutions législatives + agents IA pour accélérer la production de contenus conformes et engageants.
+          </div>
+        </div>
+        <div class="gc-item">
+          <div class="gc-number">03</div>
+          <div class="gc-question">Quoi ?</div>
+          <div class="gc-answer">
+            Un <strong>écosystème d'agents Dust</strong> connecté à la base de connaissances PayFit, transformant les actualités juridiques en articles SEO optimisés.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENCHMARK + MOTS CLES -->
+  <section id="benchmark">
+    <div class="container">
+      <div class="section-label fade-in">Livrable 1 — Recherche</div>
+      <h2 class="section-title fade-in">Benchmark concurrents & mots-clés prioritaires</h2>
+      <p class="fade-in" style="font-size:0.95rem;color:var(--text2);line-height:1.8;max-width:700px;margin-bottom:32px;">
+        Analyse rapide de Lucca, Factorial et Cegid pour identifier les angles de contenu les plus porteurs — et sélection des 10 mots-clés sur lesquels concentrer l'effort.
+      </p>
+
+      <div class="fade-in">
+        <table class="bench-table">
+          <thead>
+            <tr>
+              <th>Concurrent</th>
+              <th>Positionnement clé</th>
+              <th>Approche contenu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Lucca</td>
+              <td>SIRH, gestion des temps, onboarding</td>
+              <td>Guides longs, comparatifs, glossaires RH étendus</td>
+            </tr>
+            <tr>
+              <td>Factorial</td>
+              <td>Logiciel RH PME, congés, paie simplifiée</td>
+              <td>Articles courts, intention transactionnelle, calculateurs</td>
+            </tr>
+            <tr>
+              <td>Cegid</td>
+              <td>Paie, SIRH grands comptes, conformité DSN</td>
+              <td>Contenu expert, très orienté conformité légale</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:40px;">
+        <div class="section-label fade-in" style="margin-bottom:12px;">Mots-clés prioritaires sélectionnés</div>
+        <div class="keywords-grid fade-in">
+          <div class="kw-chip top">fiche de paie</div>
+          <div class="kw-chip top">logiciel de paie</div>
+          <div class="kw-chip top">SIRH</div>
+          <div class="kw-chip top">congés payés</div>
+          <div class="kw-chip top">calcul heure</div>
+          <div class="kw-chip">gestion du personnel</div>
+          <div class="kw-chip">RTT</div>
+          <div class="kw-chip">DPAE</div>
+          <div class="kw-chip">complémentaire tranche 1</div>
+          <div class="kw-chip">jour de fractionnement</div>
+          <div class="kw-chip">payfit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats" style="padding:56px 0;background:var(--bg2);">
+    <div class="container">
+      <div class="stats-row fade-in">
+        <div class="stat-box">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Articles SEO complets rédigés</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">4</div>
+          <div class="stat-label">Agents Dust architecturés</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">11</div>
+          <div class="stat-label">Mots-clés prioritaires ciblés</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">1</div>
+          <div class="stat-label">Simulateur Lovable en production</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVRABLES -->
+  <section id="livrables">
+    <div class="container">
+      <div class="section-label fade-in">Vue d'ensemble</div>
+      <h2 class="section-title fade-in">4 livrables en 48h</h2>
+      <div class="livrables-grid fade-in">
+        <div class="livrable-card">
+          <div class="livrable-num">Livrable 01</div>
+          <div class="livrable-title">Stratégie & Golden Circle</div>
+          <div class="livrable-desc">
+            Schéma de structuration du projet, ICP complémentaires, benchmark Lucca/Factorial/Cegid, sélection des mots-clés prioritaires et wireframe du simulateur Lovable.
+          </div>
+        </div>
+        <div class="livrable-card">
+          <div class="livrable-num">Livrable 02</div>
+          <div class="livrable-title">Architecture des agents Dust</div>
+          <div class="livrable-desc">
+            Système multi-agents : agent parent <em>articleRedactor</em> orchestrant trois agents spécialisés — MentionsLégalesAnalyst, SEOAnalystPro, Structuration_Analyst + agent indépendant payfitStyleWriter.
+          </div>
+        </div>
+        <div class="livrable-card">
+          <div class="livrable-num">Livrable 03</div>
+          <div class="livrable-title">Simulateur Lovable</div>
+          <div class="livrable-desc">
+            Calculateur interactif du temps gagné par nombre de salariés et de RH. Outil clé pour les commerciaux : prouver la valeur en démo et accélérer les ventes.
+          </div>
+          <a href="https://payfit-simu-landingpage.lovable.app" target="_blank" class="livrable-link">
+            Voir le simulateur
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+        </div>
+        <div class="livrable-card">
+          <div class="livrable-num">Livrable 04</div>
+          <div class="livrable-title">3 Articles SEO complets</div>
+          <div class="livrable-desc">
+            Articles sur <em>prolongation d'arrêt maladie</em>, <em>calcul des heures supplémentaires</em> et <em>SIRH pour PME</em> — chacun 800–1200 mots, sources légales, FAQ, CTA Payfit intégré.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTICLES SEO -->
+  <section id="articles">
+    <div class="container">
+      <div class="section-label fade-in">Livrable 4 — Contenu</div>
+      <h2 class="section-title fade-in">3 articles SEO produits par les agents</h2>
+      <div class="articles-list fade-in">
+        <div class="article-item">
+          <div class="article-icon">⚕️</div>
+          <div class="article-meta">
+            <div class="article-kw">Mot-clé cible</div>
+            <div class="article-title-text">Prolongation d'arrêt maladie : ce que l'employeur doit savoir et faire</div>
+            <div class="article-extract">
+              Délais légaux, DSN, maintien de salaire, subrogation, calcul IJSS, AT/MP, visite de reprise — guide complet avec références Légifrance (L1226-1, L323-1, R4624-31...).
+            </div>
+          </div>
+        </div>
+        <div class="article-item">
+          <div class="article-icon">🕐</div>
+          <div class="article-meta">
+            <div class="article-kw">Mot-clé cible · calcul heure</div>
+            <div class="article-title-text">Heures supplémentaires : comment les calculer et les payer correctement ?</div>
+            <div class="article-extract">
+              Taux de majoration 25%/50%, contingent annuel 220h, repos compensateur, exonération fiscale 7 500 €/an (loi 2018), FAQ 6 questions — structuré pour les rich snippets Google.
+            </div>
+          </div>
+        </div>
+        <div class="article-item">
+          <div class="article-icon">💼</div>
+          <div class="article-meta">
+            <div class="article-kw">Mot-clé cible · SIRH</div>
+            <div class="article-title-text">SIRH : définition, fonctionnalités et guide pour bien le choisir en PME</div>
+            <div class="article-extract">
+              6 critères de sélection, modules core vs avancés, coût 5–20 €/salarié/mois, FAQ RGPD/CNIL, erreurs fréquentes — ciblage PME 10–250 salariés.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE AGENTS -->
+  <section id="agents">
+    <div class="container">
+      <div class="section-label fade-in">Livrable 2 — Architecture</div>
+      <h2 class="section-title fade-in">Synoptique des agents Dust</h2>
+      <p class="fade-in" style="font-size:0.95rem;color:var(--text2);line-height:1.8;max-width:700px;margin-bottom:32px;">
+        Un agent parent orchestre trois agents spécialisés en cascade. Chaque agent a un rôle précis — veille légale, audit SEO, structure éditoriale — avant que le style PayFit soit appliqué par un agent indépendant.
+      </p>
+      <div class="agents-flow fade-in">
+        <div class="agent-node agent-parent">
+          <div class="agent-badge">Agent parent</div>
+          <div class="agent-name">articleRedactor</div>
+          <div class="agent-role">Orchestrateur principal. Reçoit la requête SEO cible, coordonne l'appel aux trois agents enfants en séquence et compile le contenu final avant livraison au style writer.</div>
+        </div>
+        <div class="agent-connector"></div>
+        <div class="agent-children">
+          <div class="agent-child">
+            <div class="agent-name">MentionsLégalesAnalyst</div>
+            <div class="agent-role">Veille juridique récursive sur Légifrance, CNIL, travail-emploi.gouv.fr — extraction et référencement de toutes les mentions légales applicables.</div>
+          </div>
+          <div class="agent-child">
+            <div class="agent-name">SEOAnalystPro</div>
+            <div class="agent-role">Audit SEO technique récursif : balises, maillage interne, rich snippets, densité de mots-clés, patterns de bonnes pratiques sur les articles existants PayFit.</div>
+          </div>
+          <div class="agent-child">
+            <div class="agent-name">Structuration_Analyst</div>
+            <div class="agent-role">Déconstruction éditoriale des articles PayFit — hiérarchie H1/H2/H3, tone of voice, placement CTA, modèle de disclaimer — pour produire un template réutilisable.</div>
+          </div>
+        </div>
+        <div class="agent-connector"></div>
+        <div class="agent-node" style="border-color:rgba(107,150,255,0.3);background:rgba(107,150,255,0.04);">
+          <div class="agent-badge" style="background:rgba(107,150,255,0.1);border-color:rgba(107,150,255,0.2);color:var(--blue2);">Agent indépendant</div>
+          <div class="agent-name">payfitStyleWriter</div>
+          <div class="agent-role">Transforme le contenu brut des agents en prose 100% style PayFit — ton accessible, phrases courtes, paragraphes aérés, CTA naturels, mentions légales intégrées.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMPT EXTRAIT -->
+  <section id="prompt">
+    <div class="container">
+      <div class="section-label fade-in">Livrable 2 — Technique</div>
+      <h2 class="section-title fade-in">Extrait du prompt — Agent parent articleRedactor</h2>
+      <p class="fade-in" style="font-size:0.95rem;color:var(--text2);line-height:1.8;max-width:700px;margin-bottom:8px;">
+        Le cœur du système. L'agent parent reçoit les paramètres de campagne et orchestre l'ensemble du pipeline de production SEO.
+      </p>
+      <div class="prompt-block fade-in">
+        <div class="prompt-header">
+          <div class="prompt-dot" style="background:#ff5f57;"></div>
+          <div class="prompt-dot" style="background:#ffbd2e;"></div>
+          <div class="prompt-dot" style="background:#28c840;"></div>
+          <span class="prompt-title">articleRedactor — settings + input</span>
+        </div>
+        <div class="prompt-body"><span class="tag">&lt;settings&gt;</span>
+Tu es un rédacteur SEO expert spécialisé en ressources humaines
+et gestion de la paie pour les TPE/PME françaises.
+Tu écris pour Payfit, solution SaaS leader en France.
+
+Ton rôle est de produire des articles de blog informatifs,
+pédagogiques et optimisés SEO qui :
+<span class="comment">  · Répondent précisément aux questions des dirigeants TPE/PME</span>
+<span class="comment">  · Positionnent Payfit comme expert sans être promotionnel</span>
+<span class="comment">  · Respectent les standards E-E-A-T de Google</span>
+<span class="comment">  · Génèrent du trafic qualifié et des conversions</span>
+<span class="tag">&lt;/settings&gt;</span>
+
+<span class="tag">&lt;input&gt;</span>
+  requete_cible      : <span class="string">"{{ requete_cible }}"</span>
+  intention          : <span class="string">"{{ intention }}"</span>
+  <span class="comment">  ↳ informationnelle / transactionnelle / navigationnelle</span>
+  audience           : <span class="string">"{{ audience }}"</span>
+  longueur           : <span class="string">"{{ longueur }}"</span>          <span class="comment">// défaut : 800-1200 mots</span>
+  mots_cles_sec      : <span class="string">"{{ mots_cles_secondaires }}"</span>
+  positionnement     : <span class="string">"{{ positionnement_payfit }}"</span>
+  cta                : <span class="string">"{{ cta }}"</span>
+<span class="tag">&lt;/input&gt;</span>
+
+<span class="tag">&lt;task&gt;</span>
+  <span class="value">1. Analyser l'intention de recherche</span>
+  <span class="value">2. Identifier les 5-7 questions secondaires de l'audience</span>
+  <span class="value">3. Définir un plan H2/H3 couvrant tous les angles</span>
+  <span class="value">4. Appeler MentionsLégalesAnalyst → sources officielles</span>
+  <span class="value">5. Appeler SEOAnalystPro → audit structure + maillage</span>
+  <span class="value">6. Appeler Structuration_Analyst → template éditorial</span>
+  <span class="value">7. Compiler et transmettre à payfitStyleWriter</span>
+<span class="tag">&lt;/task&gt;</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIMULATEUR -->
+  <section id="simulateur">
+    <div class="container">
+      <div class="section-label fade-in">Livrable 3 — No-Code</div>
+      <h2 class="section-title fade-in">Simulateur Lovable — Calculateur de temps gagné</h2>
+      <p class="fade-in" style="font-size:0.95rem;color:var(--text2);line-height:1.8;max-width:700px;margin-bottom:32px;">
+        L'objectif n'est pas de <em>dire</em> aux RH qu'ils gagneront du temps avec PayFit — c'est de le leur <strong style="color:var(--text)">montrer avec leurs propres chiffres</strong>. En quelques clics, ils voient le temps actuellement passé sur la paie et ce qu'ils récupèrent avec PayFit.
+      </p>
+      <div class="livrables-grid fade-in">
+        <div class="livrable-card" style="grid-column:1/2;">
+          <div class="livrable-num">Pourquoi ce format ?</div>
+          <div class="livrable-title">Répondre à une intention de recherche spécifique</div>
+          <div class="livrable-desc">
+            Les RH et dirigeants cherchent des outils concrets, pas des promesses marketing. Un simulateur interactif répond à l'intention <strong>transactionnelle</strong> en apportant une preuve personnalisée de la valeur PayFit — moins de doutes, plus de conversions.
+          </div>
+          <a href="https://payfit-simu-landingpage.lovable.app" target="_blank" class="livrable-link">
+            Ouvrir le simulateur →
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+        </div>
+        <div class="livrable-card">
+          <div class="livrable-num">Inputs du calculateur</div>
+          <div class="livrable-title">Paramètres utilisés</div>
+          <div class="livrable-desc" style="margin-bottom:12px;">
+            Le simulateur prend en compte :
+          </div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+            <li style="display:flex;gap:10px;align-items:flex-start;font-size:0.87rem;color:var(--text2);">
+              <span style="color:var(--blue2);margin-top:2px;">→</span> Nombre de salariés dans l'entreprise
+            </li>
+            <li style="display:flex;gap:10px;align-items:flex-start;font-size:0.87rem;color:var(--text2);">
+              <span style="color:var(--blue2);margin-top:2px;">→</span> Nombre de personnes RH dédiées
+            </li>
+            <li style="display:flex;gap:10px;align-items:flex-start;font-size:0.87rem;color:var(--text2);">
+              <span style="color:var(--blue2);margin-top:2px;">→</span> Temps actuel passé sur la paie (saisie, vérifications, corrections)
+            </li>
+            <li style="display:flex;gap:10px;align-items:flex-start;font-size:0.87rem;color:var(--text2);">
+              <span style="color:var(--blue2);margin-top:2px;">→</span> Calcul du gain mensuel et annuel estimé avec PayFit
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section id="stack">
+    <div class="container">
+      <div class="section-label fade-in">Technologies</div>
+      <h2 class="section-title fade-in">Stack utilisé</h2>
+      <div class="stack-grid fade-in">
+        <div class="stack-chip">
+          <div class="stack-chip-icon">🤖</div>
+          <div class="stack-chip-name">Dust</div>
+          <div class="stack-chip-role">Orchestration agents IA</div>
+        </div>
+        <div class="stack-chip">
+          <div class="stack-chip-icon">💜</div>
+          <div class="stack-chip-name">Lovable</div>
+          <div class="stack-chip-role">Simulateur no-code</div>
+        </div>
+        <div class="stack-chip">
+          <div class="stack-chip-icon">⚙️</div>
+          <div class="stack-chip-name">Make</div>
+          <div class="stack-chip-role">Scraping Culture RH</div>
+        </div>
+        <div class="stack-chip">
+          <div class="stack-chip-icon">📊</div>
+          <div class="stack-chip-name">SEMrush</div>
+          <div class="stack-chip-role">Recherche mots-clés</div>
+        </div>
+        <div class="stack-chip">
+          <div class="stack-chip-icon">🧠</div>
+          <div class="stack-chip-name">Claude / GPT-4</div>
+          <div class="stack-chip-role">Moteur des agents</div>
+        </div>
+        <div class="stack-chip">
+          <div class="stack-chip-icon">🎬</div>
+          <div class="stack-chip-name">Loom</div>
+          <div class="stack-chip-role">Démo vidéo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta">
+    <div class="container">
+      <h2 class="cta-title fade-in">Voir le simulateur en action</h2>
+      <p class="cta-sub fade-in">
+        Un outil fonctionnel, construit en vibe coding sur Lovable, qui prouve la valeur de PayFit avec les chiffres de l'utilisateur — pas avec des promesses.
+      </p>
+      <div class="cta-buttons fade-in">
+        <a href="https://payfit-simu-landingpage.lovable.app" target="_blank" class="btn-primary">
+          Ouvrir le simulateur
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
+        <a href="https://www.loom.com/share/e7e3e6ce95a04c9da4481d0e2c6f7349" target="_blank" class="btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Voir la démo Loom
+        </a>
+        <a href="index.html" class="btn-secondary">← Tous les projets</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Fade-in on scroll
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.1 }
+    );
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
