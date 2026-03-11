@@ -150,6 +150,37 @@
     .code-body { padding: 1.4rem 1.6rem; overflow-x: auto; }
     .code-body pre { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; font-size: 0.83rem; line-height: 1.75; color: #cdd9e5; white-space: pre; }
 
+    /* ====== GALLERY ====== */
+    #gallery { background: var(--bg2); border-bottom: 1px solid var(--border); }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .gallery-item {
+      border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+      cursor: pointer; position: relative; aspect-ratio: 16/10;
+      background: var(--card); transition: border-color 0.2s, transform 0.2s;
+    }
+    .gallery-item:hover { border-color: var(--cyan); transform: translateY(-4px); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item .gallery-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay-icon { color: #fff; font-size: 1.8rem; }
+    .gallery-caption { font-size: 0.76rem; color: var(--text3); padding: 8px 10px; text-align: center; background: var(--card); border-top: 1px solid var(--border); }
+
+    /* ====== LIGHTBOX ====== */
+    #lightbox { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 10px; box-shadow: 0 0 60px rgba(0,212,255,0.15); }
+    .lb-close { position: absolute; top: 24px; right: 32px; font-size: 2rem; color: #fff; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; }
+    .lb-close:hover { opacity: 1; }
+    .lb-prev, .lb-next { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2.5rem; color: #fff; cursor: pointer; opacity: 0.5; transition: opacity 0.2s; user-select: none; }
+    .lb-prev:hover, .lb-next:hover { opacity: 1; }
+    .lb-prev { left: 24px; }
+    .lb-next { right: 24px; }
+    .lb-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--text3); }
+
     /* ====== STATS ====== */
     #stats { border-bottom: 1px solid var(--border); }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
@@ -417,6 +448,53 @@
     </div>
   </section>
 
+  <!-- ====== GALLERY ====== -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-label fade-in">Interface</div>
+      <h2 class="section-title fade-in">Aperçu de l'application</h2>
+      <div class="gallery-grid fade-in">
+
+        <div class="gallery-item" onclick="openLightbox(0)">
+          <img src="assets/polymath-landing.png" alt="Landing page Polymath" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Landing page</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(1)">
+          <img src="assets/polymath-why.png" alt="Why Traders Choose Polymath" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Pourquoi Polymath</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(2)">
+          <img src="assets/polymath-perf.png" alt="Global Sharp Performance" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Performance des sharps</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(3)">
+          <img src="assets/polymath-dashboard.png" alt="Dashboard Top Gainers" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Dashboard Top Gainers</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(4)">
+          <img src="assets/polymath-advisor.png" alt="Wallet Match Advisor" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Wallet Match Advisor</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(5)">
+          <img src="assets/polymath-live.png" alt="Live Activity" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Activité en temps réel</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ====== STATS ====== -->
   <section id="stats">
     <div class="container">
@@ -465,11 +543,58 @@
     <p>Conçu &amp; développé par <span>Jude Buyikana</span> · 2025</p>
   </footer>
 
+  <!-- ====== LIGHTBOX ====== -->
+  <div id="lightbox">
+    <span class="lb-close" onclick="closeLightbox()">✕</span>
+    <span class="lb-prev" onclick="lbMove(-1)">‹</span>
+    <img id="lb-img" src="" alt="" />
+    <span class="lb-next" onclick="lbMove(1)">›</span>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
+
   <script>
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
     }, { threshold: 0.1 });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Lightbox
+    const slides = [
+      { src: 'assets/polymath-landing.png',   alt: 'Landing page' },
+      { src: 'assets/polymath-why.png',        alt: 'Pourquoi Polymath' },
+      { src: 'assets/polymath-perf.png',       alt: 'Performance des sharps' },
+      { src: 'assets/polymath-dashboard.png',  alt: 'Dashboard Top Gainers' },
+      { src: 'assets/polymath-advisor.png',    alt: 'Wallet Match Advisor' },
+      { src: 'assets/polymath-live.png',       alt: 'Activité en temps réel' },
+    ];
+    let currentSlide = 0;
+    function openLightbox(index) {
+      currentSlide = index; updateLightbox();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function lbMove(dir) {
+      currentSlide = (currentSlide + dir + slides.length) % slides.length;
+      updateLightbox();
+    }
+    function updateLightbox() {
+      const s = slides[currentSlide];
+      document.getElementById('lb-img').src = s.src;
+      document.getElementById('lb-img').alt = s.alt;
+      document.getElementById('lb-counter').textContent = (currentSlide + 1) + ' / ' + slides.length;
+    }
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+      if (e.target === this) closeLightbox();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') lbMove(1);
+      if (e.key === 'ArrowLeft') lbMove(-1);
+    });
   </script>
 </body>
 </html>
