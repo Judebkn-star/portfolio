@@ -1858,7 +1858,11 @@ CONTACT :
 
     let isOpen = false;
     let isLoading = false;
-    const history = [];
+    // Gemma ne supporte pas system_instruction — on injecte le contexte en premier tour
+    const history = [
+      { role: 'user',  parts: [{ text: `Voici le contexte du portfolio de Jude Buyikana. Mémorise ces informations et utilise-les pour répondre aux questions des visiteurs. Réponds uniquement "Compris !" pour confirmer.\n\n${SYSTEM_PROMPT}` }] },
+      { role: 'model', parts: [{ text: 'Compris !' }] }
+    ];
 
     function toggleChat() {
       isOpen = !isOpen;
@@ -1930,7 +1934,6 @@ CONTACT :
 
       try {
         const body = {
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
           contents: history,
           generationConfig: { temperature: 0.7, maxOutputTokens: 400 }
         };
