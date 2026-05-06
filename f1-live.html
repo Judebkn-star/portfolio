@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>f1_archive · live SQL run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'JetBrains Mono', ui-monospace, monospace;
+  background:#08090a;
+  color:#e6edf3;
+  font-size:13px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+
+.stage{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 20%, #14080a, #050607 80%);
+}
+.frame{
+  width:1280px;height:720px;
+  display:flex;flex-direction:column;
+  background:#0a0c0f;
+  border:1px solid #1a1f27;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 60px 140px -30px rgba(0,0,0,0.7), 0 0 0 1px rgba(232,0,61,0.06);
+  transform-origin:center center;
+}
+
+/* window chrome */
+.chrome{
+  display:flex;align-items:center;gap:14px;
+  padding:10px 16px;
+  background:#0d1014;
+  border-bottom:1px solid #1a1f27;
+  font-size:11px;
+}
+.dots{display:flex;gap:6px}
+.dots i{width:11px;height:11px;border-radius:50%;display:block}
+.dots i:nth-child(1){background:#ff5f56}
+.dots i:nth-child(2){background:#ffbd2e}
+.dots i:nth-child(3){background:#27c93f}
+.tabs{display:flex;gap:4px;margin-left:14px}
+.tab{
+  padding:5px 12px;border-radius:5px 5px 0 0;
+  color:#6b7480;background:transparent;
+  border:1px solid transparent;border-bottom:0;
+  display:flex;align-items:center;gap:6px;
+}
+.tab.on{color:#e6edf3;background:#0a0c0f;border-color:#1a1f27}
+.tab .lang{color:#e8003d;font-size:9px;font-weight:600}
+.title{
+  margin-left:auto;color:#6b7480;font-size:11px;
+  display:flex;align-items:center;gap:10px;
+}
+.title .live{color:#e8003d;display:flex;align-items:center;gap:6px}
+.title .live::before{content:"";width:7px;height:7px;border-radius:50%;background:#e8003d;box-shadow:0 0 0 3px rgba(232,0,61,0.22);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
+
+/* main grid: editor / results / leaderboard */
+.body{
+  flex:1;
+  display:grid;
+  grid-template-columns:1.2fr 1.45fr 0.85fr;
+  min-height:0;
+}
+.pane{
+  display:flex;flex-direction:column;
+  border-right:1px solid #1a1f27;
+  min-height:0;
+}
+.pane:last-child{border-right:0}
+.pane-h{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px;
+  background:#0c0f13;
+  border-bottom:1px solid #1a1f27;
+  font-size:10.5px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase;
+}
+.pane-h .b{
+  width:18px;height:18px;border-radius:4px;
+  background:#11151b;border:1px solid #1f2630;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:#e8003d;font-weight:600;font-size:9.5px;
+}
+.pane-h .right{margin-left:auto;color:#4d5560;font-size:10px}
+.pane-h .running{color:#e8003d;display:flex;align-items:center;gap:5px}
+.pane-h .running::before{content:"";width:6px;height:6px;border-radius:50%;background:#e8003d;animation:pulse 1.2s ease-in-out infinite}
+
+/* ----- pane 1: SQL editor ----- */
+.editor{
+  flex:1;
+  display:grid;
+  grid-template-columns:34px 1fr;
+  min-height:0;
+  overflow:hidden;
+  font-size:12.5px;
+  background:linear-gradient(180deg, #0a0c0f 0%, #0c0f13 100%);
+}
+.gutter{
+  padding:10px 0;
+  text-align:right;
+  font-size:10.5px;
+  color:#3d434d;
+  user-select:none;
+  background:#090b0e;
+  border-right:1px solid #14181f;
+}
+.gutter span{display:block;line-height:1.65;padding-right:10px}
+.code{
+  padding:10px 14px;
+  white-space:pre;
+  line-height:1.65;
+  overflow:hidden;
+  position:relative;
+}
+.code .ln{display:block;min-height:1.65em}
+.code .hl{background:rgba(232,0,61,0.07);margin:0 -14px;padding:0 14px}
+
+.cursor{
+  display:inline-block;width:7px;height:1em;
+  background:#e8003d;vertical-align:-2px;
+  margin-left:1px;
+  animation:blink 1s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* SQL syntax */
+.kw{color:#ff7eb6;font-weight:500}     /* SELECT, FROM, WHERE… */
+.fn{color:#82aaff}                      /* COUNT, AVG, RANK… */
+.str{color:#a3e635}                     /* string literals */
+.num{color:#ffb627}                     /* numbers */
+.cm{color:#4d5560;font-style:italic}    /* comments */
+.op{color:#9aa5b1}                      /* operators */
+.tbl{color:#e8003d;font-weight:500}     /* table names */
+.col{color:#7ee787}                     /* columns */
+.al{color:#c084fc}                      /* aliases */
+
+/* ----- pane 2: query result ----- */
+.results{
+  flex:1;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  background:linear-gradient(180deg, #0a0c0f 0%, #090b0e 100%);
+}
+.exec{
+  padding:8px 14px;
+  border-bottom:1px solid #1a1f27;
+  display:flex;align-items:center;gap:14px;
+  font-size:11px;color:#6b7480;
+  background:#0c0f13;
+}
+.exec .item{display:flex;align-items:center;gap:6px}
+.exec .item strong{color:#e6edf3;font-weight:500}
+.exec .item .ok{color:#27c93f}
+.exec .item .b{
+  display:inline-block;width:6px;height:6px;border-radius:50%;background:#27c93f;
+  box-shadow:0 0 0 3px rgba(39,201,63,0.18);
+}
+.exec .right{margin-left:auto;display:flex;gap:14px}
+
+/* result table */
+.rtable{
+  flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;
+  font-size:11.5px;
+}
+.rt-h{
+  display:grid;
+  grid-template-columns:34px 2.2fr 1.6fr 0.6fr 0.7fr 0.7fr 0.7fr 0.8fr;
+  padding:8px 14px;
+  background:#0c0f13;
+  border-bottom:1px solid #1a1f27;
+  font-size:10px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase;
+  gap:8px;
+}
+.rt-body{flex:1;overflow:hidden;position:relative}
+.rt-row{
+  display:grid;
+  grid-template-columns:34px 2.2fr 1.6fr 0.6fr 0.7fr 0.7fr 0.7fr 0.8fr;
+  padding:6px 14px;
+  border-bottom:1px dashed #14181f;
+  gap:8px;
+  align-items:center;
+  color:#9aa5b1;
+}
+.rt-row .rn{color:#3d434d;font-size:10px}
+.rt-row .driver{color:#e6edf3;font-weight:500;display:flex;align-items:center;gap:8px;overflow:hidden}
+.rt-row .driver .flag{width:14px;height:10px;border-radius:1px;flex-shrink:0;display:inline-block}
+.rt-row .ctor{color:#9aa5b1}
+.rt-row .num-c{color:#ffb627;text-align:right;font-weight:500}
+.rt-row .pos{color:#27c93f;text-align:right;font-weight:500}
+.rt-row .neg{color:#ff5f56;text-align:right;font-weight:500}
+.rt-row.fresh{background:rgba(232,0,61,0.07);animation:rowflash 1.2s ease-out}
+@keyframes rowflash{0%{background:rgba(232,0,61,0.22)}100%{background:rgba(232,0,61,0.07)}}
+
+/* ----- pane 3: leaderboard / chart ----- */
+.lead{
+  flex:1;
+  padding:12px 14px;
+  display:flex;flex-direction:column;gap:14px;
+  overflow:hidden;
+}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{
+  border:1px solid #1a1f27;border-radius:6px;
+  padding:10px 12px;
+  background:#0c0f13;
+}
+.kpi-l{font-size:9.5px;color:#6b7480;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.kpi-v{font-size:18px;color:#e6edf3;font-weight:600;letter-spacing:-0.01em;display:flex;align-items:baseline;gap:4px}
+.kpi-v .u{font-size:10px;color:#6b7480;font-weight:400}
+.kpi-v.red{color:#e8003d}
+.kpi-v.amber{color:#ffb627}
+
+.lbox{
+  border:1px solid #1a1f27;border-radius:6px;
+  background:#0c0f13;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.lbox-h{
+  padding:8px 12px;border-bottom:1px solid #1a1f27;
+  font-size:10px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.lbox-h .v{color:#e8003d;font-weight:600}
+
+.lboard{display:flex;flex-direction:column;font-size:11px}
+.lrow{
+  display:grid;
+  grid-template-columns:24px 1fr 60px;
+  gap:8px;
+  padding:6px 12px;
+  border-bottom:1px dashed #14181f;
+  align-items:center;
+  color:#9aa5b1;
+  position:relative;
+  transition:transform 0.5s cubic-bezier(0.2,0.7,0.2,1);
+}
+.lrow:last-child{border-bottom:0}
+.lrow .pos{color:#3d434d;font-size:10px;font-weight:600}
+.lrow.p1 .pos{color:#ffd700}
+.lrow.p2 .pos{color:#c0c0c0}
+.lrow.p3 .pos{color:#cd7f32}
+.lrow .nm{color:#e6edf3;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.lrow .nm .flag{width:14px;height:10px;border-radius:1px;flex-shrink:0;display:inline-block}
+.lrow .vw{color:#e8003d;text-align:right;font-weight:500;font-feature-settings:"tnum"}
+.lrow.p1{background:rgba(255,215,0,0.04)}
+
+.scan{
+  border:1px solid #1a1f27;border-radius:6px;
+  padding:10px 12px;background:#0c0f13;
+  display:flex;flex-direction:column;gap:6px;
+}
+.scan-h{display:flex;justify-content:space-between;font-size:10px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase}
+.scan-h .v{color:#e8003d;font-weight:600}
+.scan-bar{
+  height:6px;background:#11151b;border-radius:3px;overflow:hidden;
+  border:1px solid #14181f;
+}
+.scan-bar i{
+  display:block;height:100%;
+  background:linear-gradient(90deg, #e8003d, #ff5f56);
+  border-radius:3px;
+  box-shadow:0 0 8px rgba(232,0,61,0.4);
+  width:0%;
+  transition:width 0.4s linear;
+}
+.scan-foot{display:flex;justify-content:space-between;font-size:10px;color:#6b7480}
+
+/* status bar */
+.statusbar{
+  display:flex;align-items:center;gap:0;
+  padding:0;
+  background:#0d1014;
+  border-top:1px solid #1a1f27;
+  font-size:10.5px;
+}
+.sb-cell{
+  padding:7px 14px;
+  display:flex;align-items:center;gap:8px;
+  border-right:1px solid #1a1f27;
+  color:#6b7480;
+}
+.sb-cell strong{color:#e6edf3;font-weight:500}
+.sb-cell.red{color:#e8003d}
+.sb-cell.red::before{content:"●";font-size:8px}
+.sb-progress{
+  flex:1;display:flex;align-items:center;gap:10px;padding:0 14px;
+}
+.sb-progress .lbl{color:#6b7480}
+.sb-progress .barx{flex:1;height:4px;background:#11151b;border-radius:2px;overflow:hidden;border:1px solid #14181f}
+.sb-progress .barx i{display:block;height:100%;background:linear-gradient(90deg, #e8003d, #ffb627);width:0%;transition:width 0.4s linear}
+.sb-progress .pct{color:#e8003d;font-weight:600;min-width:40px;text-align:right}
+.sb-cell.right{margin-left:auto;border-right:0;border-left:1px solid #1a1f27;color:#5b9dff}
+
+.replay{
+  position:fixed;bottom:18px;right:18px;
+  z-index:10;
+  padding:8px 14px;
+  background:#0c0f13;border:1px solid #1a1f27;border-radius:6px;
+  color:#9aa5b1;font:500 11px/1 'JetBrains Mono', monospace;
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  letter-spacing:0.04em;
+}
+.replay:hover{color:#e8003d;border-color:#e8003d}
+.replay::before{content:"↻";color:#e8003d}
+
+/* country flag swatches */
+.f-NLD{background:linear-gradient(180deg,#ae1c28 33%,#fff 33% 66%,#21468b 66%)}
+.f-GBR{background:#012169 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'><path d='M0 0l60 30M60 0L0 30' stroke='%23fff' stroke-width='6'/><path d='M30 0v30M0 15h60' stroke='%23fff' stroke-width='10'/><path d='M30 0v30M0 15h60' stroke='%23c8102e' stroke-width='6'/></svg>") center/cover}
+.f-DEU{background:linear-gradient(180deg,#000 33%,#dd0000 33% 66%,#ffce00 66%)}
+.f-FIN{background:#fff;position:relative}
+.f-FIN::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 4px,#003580 4px 7px,transparent 7px),linear-gradient(180deg,transparent 3px,#003580 3px 6px,transparent 6px)}
+.f-ESP{background:linear-gradient(180deg,#aa151b 25%,#f1bf00 25% 75%,#aa151b 75%)}
+.f-MCO{background:linear-gradient(180deg,#ce1126 50%,#fff 50%)}
+.f-BRA{background:#009c3b;position:relative;overflow:hidden}
+.f-BRA::after{content:"";position:absolute;inset:1px;background:radial-gradient(circle at 50% 50%, #002776 22%, transparent 22%)}
+.f-AUT{background:linear-gradient(180deg,#ed2939 33%,#fff 33% 66%,#ed2939 66%)}
+.f-FRA{background:linear-gradient(90deg,#0055a4 33%,#fff 33% 66%,#ef4135 66%)}
+.f-AUS{background:#012169;position:relative;overflow:hidden}
+.f-AUS::after{content:"★";position:absolute;right:1px;top:-2px;color:#fff;font-size:7px}
+.f-MEX{background:linear-gradient(90deg,#006847 33%,#fff 33% 66%,#ce1126 66%)}
+.f-CAN{background:linear-gradient(90deg,#d52b1e 33%,#fff 33% 66%,#d52b1e 66%);position:relative}
+.f-CAN::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;background:#d52b1e;transform:translate(-50%,-50%) rotate(45deg)}
+.f-ITA{background:linear-gradient(90deg,#008c45 33%,#fff 33% 66%,#cd212a 66%)}
+.f-USA{background:repeating-linear-gradient(180deg,#b22234 0 1px,#fff 1px 2px);position:relative}
+.f-USA::after{content:"";position:absolute;left:0;top:0;width:6px;height:5px;background:#3c3b6e}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="frame" id="frame">
+
+    <!-- chrome -->
+    <div class="chrome">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="tabs">
+        <div class="tab on"><span class="lang">SQL</span> top_drivers.sql</div>
+        <div class="tab"><span class="lang">SQL</span> pit_strategy.sql</div>
+        <div class="tab"><span class="lang">SQL</span> schema.sql</div>
+      </div>
+      <div class="title">
+        <span>f1_archive · BigQuery</span>
+        <span>·</span>
+        <span class="live">LIVE</span>
+      </div>
+    </div>
+
+    <!-- 3-pane body -->
+    <div class="body">
+
+      <!-- editor -->
+      <div class="pane">
+        <div class="pane-h">
+          <span class="b">SQL</span>
+          <span>top_drivers.sql · BigQuery Standard</span>
+          <span class="right">UTF-8 · LF</span>
+        </div>
+        <div class="editor">
+          <div class="gutter" id="gutter"></div>
+          <div class="code" id="code"></div>
+        </div>
+      </div>
+
+      <!-- results -->
+      <div class="pane">
+        <div class="pane-h">
+          <span class="b">QR</span>
+          <span>query result · cached: false</span>
+          <span class="right" id="qr-status"><span class="running">running…</span></span>
+        </div>
+        <div class="results">
+          <div class="exec">
+            <span class="item"><span class="b"></span><span class="ok">success</span></span>
+            <span class="item"><strong id="ex-rows">—</strong> rows</span>
+            <span class="item"><strong id="ex-bytes">—</strong> processed</span>
+            <span class="item"><strong id="ex-slot">—</strong> slot ms</span>
+            <span class="right">
+              <span class="item"><strong id="ex-time">—</strong></span>
+              <span class="item">job <strong>jb-2024-rcg</strong></span>
+            </span>
+          </div>
+          <div class="rtable">
+            <div class="rt-h">
+              <span>#</span>
+              <span>DRIVER</span>
+              <span>CONSTRUCTOR</span>
+              <span style="text-align:right">RACES</span>
+              <span style="text-align:right">WINS</span>
+              <span style="text-align:right">POLES</span>
+              <span style="text-align:right">PODS</span>
+              <span style="text-align:right">PTS / RACE</span>
+            </div>
+            <div class="rt-body" id="rt-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- leaderboard -->
+      <div class="pane">
+        <div class="pane-h">
+          <span class="b">F1</span>
+          <span>leaderboard · live</span>
+          <span class="right">1950–2024</span>
+        </div>
+        <div class="lead">
+
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-l">ROWS SCANNED</div>
+              <div class="kpi-v" id="kpi-rows">0</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">DATA PROCESSED</div>
+              <div class="kpi-v amber" id="kpi-bytes"><span>0</span><span class="u">MB</span></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">SLOT TIME</div>
+              <div class="kpi-v" id="kpi-slot"><span>0</span><span class="u">ms</span></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">COST · ON-DEMAND</div>
+              <div class="kpi-v red" id="kpi-cost"><span>$0.00</span></div>
+            </div>
+          </div>
+
+          <div class="scan">
+            <div class="scan-h"><span>QUERY EXECUTION</span><span class="v" id="scan-pct">0%</span></div>
+            <div class="scan-bar"><i id="scan-fill"></i></div>
+            <div class="scan-foot"><span id="scan-stage">stage 1/4 · scanning</span><span id="scan-eta">eta —</span></div>
+          </div>
+
+          <div class="lbox">
+            <div class="lbox-h"><span>TOP 5 · ALL-TIME</span><span class="v" id="lb-meta">—</span></div>
+            <div class="lboard" id="lboard"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- statusbar -->
+    <div class="statusbar">
+      <div class="sb-cell red"> <strong>online</strong></div>
+      <div class="sb-cell">project: <strong>jb-portfolio-2026</strong></div>
+      <div class="sb-cell">dataset: <strong>f1_archive</strong></div>
+      <div class="sb-cell">region: <strong>EU</strong></div>
+      <div class="sb-progress">
+        <span class="lbl">query</span>
+        <div class="barx"><i id="sb-bar"></i></div>
+        <span class="pct" id="sb-pct">0%</span>
+      </div>
+      <div class="sb-cell right" id="sb-clock">00:00.000</div>
+    </div>
+
+  </div>
+</div>
+
+<button class="replay" id="replay">replay</button>
+
+<script>
+/* ============================================================
+   STAGE — scale 1280x720 to viewport
+   ============================================================ */
+function fit(){
+  var f = document.getElementById('frame');
+  var pad = 32;
+  var sx = (window.innerWidth - pad) / 1280;
+  var sy = (window.innerHeight - pad) / 720;
+  var s = Math.min(sx, sy, 1);
+  f.style.transform = 'scale(' + s + ')';
+}
+window.addEventListener('resize', fit);
+fit();
+
+/* ============================================================
+   SQL SOURCE — tokenized, line by line
+   ============================================================ */
+var SOURCE = [
+  ['cm','-- top_drivers.sql · 70 years of F1 archive (1950 → 2024)'],
+  ['cm','-- ranks drivers by points-per-race + win efficiency'],
+  [],
+  ['kw','WITH ','al','race_results',' ','kw','AS ','op','('],
+  ['  ','kw','SELECT'],
+  ['    ','tbl','r','op','.','col','driver_id','op',','],
+  ['    ','tbl','r','op','.','col','race_id','op',','],
+  ['    ','tbl','r','op','.','col','position','op',','],
+  ['    ','tbl','r','op','.','col','points','op',','],
+  ['    ','kw','CASE ','kw','WHEN ','tbl','r','op','.','col','position ','op','= ','num','1 ','kw','THEN ','num','1 ','kw','ELSE ','num','0 ','kw','END ','kw','AS ','col','win'],
+  ['  ','kw','FROM ','tbl','`f1_archive.results` ','al','r'],
+  ['  ','kw','WHERE ','tbl','r','op','.','col','season ','op','BETWEEN ','num','1950 ','kw','AND ','num','2024'],
+  ['op',')'],
+  [],
+  ['kw','SELECT'],
+  ['  ','tbl','d','op','.','col','code','op',','],
+  ['  ','tbl','d','op','.','col','full_name ','kw','AS ','col','driver','op',','],
+  ['  ','tbl','c','op','.','col','name      ','kw','AS ','col','constructor','op',','],
+  ['  ','fn','COUNT','(','op','*','op',') ','kw','AS ','col','races','op',','],
+  ['  ','fn','SUM','(','tbl','rr','op','.','col','win','op',') ','kw','AS ','col','wins','op',','],
+  ['  ','fn','SUM','(','kw','CASE ','kw','WHEN ','tbl','q','op','.','col','position ','op','= ','num','1 ','kw','THEN ','num','1 ','kw','ELSE ','num','0 ','kw','END','op',') ','kw','AS ','col','poles','op',','],
+  ['  ','fn','SUM','(','kw','CASE ','kw','WHEN ','tbl','rr','op','.','col','position ','op','<= ','num','3 ','kw','THEN ','num','1 ','kw','ELSE ','num','0 ','kw','END','op',') ','kw','AS ','col','podiums','op',','],
+  ['  ','fn','ROUND','(','fn','SUM','(','tbl','rr','op','.','col','points','op',') ','op','/ ','fn','COUNT','(','op','*','op',')',', ','num','2','op',') ','kw','AS ','col','pts_per_race'],
+  ['kw','FROM ','al','race_results ','tbl','rr'],
+  ['kw','JOIN ','tbl','`f1_archive.drivers` ','al','d  ','kw','ON ','tbl','d','op','.','col','driver_id ','op','= ','tbl','rr','op','.','col','driver_id'],
+  ['kw','JOIN ','tbl','`f1_archive.constructors` ','al','c  ','kw','ON ','tbl','c','op','.','col','team_id   ','op','= ','tbl','rr','op','.','col','team_id'],
+  ['kw','LEFT JOIN ','tbl','`f1_archive.qualifying` ','al','q ','kw','ON ','tbl','q','op','.','col','driver_id ','op','= ','tbl','rr','op','.','col','driver_id ','kw','AND ','tbl','q','op','.','col','race_id ','op','= ','tbl','rr','op','.','col','race_id'],
+  ['kw','GROUP BY ','col','code','op',', ','col','driver','op',', ','col','constructor'],
+  ['kw','HAVING ','col','races ','op','>= ','num','60'],
+  ['kw','ORDER BY ','col','pts_per_race ','kw','DESC'],
+  ['kw','LIMIT ','num','25 ','op',';']
+];
+
+function buildLine(tokens){
+  var html = '';
+  var i = 0;
+  while (i < tokens.length){
+    var t = tokens[i];
+    if (['kw','fn','str','num','cm','op','tbl','col','al'].indexOf(t) >= 0){
+      var v = tokens[i+1] || '';
+      html += '<span class="' + t + '">' + escapeHtml(v) + '</span>';
+      i += 2;
+    } else {
+      html += escapeHtml(t);
+      i += 1;
+    }
+  }
+  return html;
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];
+  });
+}
+
+var codeEl = document.getElementById('code');
+var gutterEl = document.getElementById('gutter');
+var TOTAL_LINES = SOURCE.length;
+var typedLines = 0;
+
+function renderCode(upTo){
+  var html = '';
+  var gutter = '';
+  for (var i = 0; i < upTo && i < SOURCE.length; i++){
+    var line = SOURCE[i].length === 0 ? '' : buildLine(SOURCE[i]);
+    var cls = (i === upTo - 1) ? 'ln hl' : 'ln';
+    var cursor = (i === upTo - 1) ? '<span class="cursor"></span>' : '';
+    html += '<span class="' + cls + '">' + (line || '&nbsp;') + cursor + '</span>';
+    gutter += '<span>' + (i + 1) + '</span>';
+  }
+  codeEl.innerHTML = html;
+  gutterEl.innerHTML = gutter;
+}
+
+/* ============================================================
+   FAKE F1 DATA
+   ============================================================ */
+var DRIVERS = [
+  {code:'VER', full:'Max Verstappen',     ctor:'Red Bull · Honda',     flag:'NLD', races:208, wins:62, poles:40, pods:112, ppr:8.84},
+  {code:'HAM', full:'Lewis Hamilton',     ctor:'Mercedes',             flag:'GBR', races:357, wins:103,poles:104,pods:200, ppr:7.92},
+  {code:'SCH', full:'Michael Schumacher', ctor:'Ferrari',              flag:'DEU', races:308, wins:91, poles:68, pods:155, ppr:5.41},
+  {code:'PRO', full:'Alain Prost',        ctor:'McLaren · Williams',   flag:'FRA', races:202, wins:51, poles:33, pods:106, ppr:3.91},
+  {code:'SEN', full:'Ayrton Senna',       ctor:'McLaren · Lotus',      flag:'BRA', races:162, wins:41, poles:65, pods:80,  ppr:3.83},
+  {code:'ALO', full:'Fernando Alonso',    ctor:'Renault · Aston',      flag:'ESP', races:401, wins:32, poles:22, pods:106, ppr:5.53},
+  {code:'VET', full:'Sebastian Vettel',   ctor:'Red Bull · Ferrari',   flag:'DEU', races:300, wins:53, poles:57, pods:122, ppr:5.06},
+  {code:'RAI', full:'Kimi Räikkönen',     ctor:'Ferrari · Lotus',      flag:'FIN', races:349, wins:21, poles:18, pods:103, ppr:3.21},
+  {code:'CLA', full:'Jim Clark',          ctor:'Lotus',                flag:'GBR', races:73,  wins:25, poles:33, pods:32,  ppr:3.16},
+  {code:'STE', full:'Jackie Stewart',     ctor:'Tyrrell · Matra',      flag:'GBR', races:99,  wins:27, poles:17, pods:43,  ppr:3.61},
+  {code:'LAU', full:'Niki Lauda',         ctor:'Ferrari · McLaren',    flag:'AUT', races:171, wins:25, poles:24, pods:54,  ppr:2.85},
+  {code:'FAN', full:'Juan Manuel Fangio', ctor:'Mercedes · Maserati',  flag:'ITA', races:51,  wins:24, poles:29, pods:35,  ppr:5.31},
+  {code:'MAN', full:'Nigel Mansell',      ctor:'Williams · Ferrari',   flag:'GBR', races:187, wins:31, poles:32, pods:59,  ppr:2.40},
+  {code:'PIQ', full:'Nelson Piquet',      ctor:'Brabham · Williams',   flag:'BRA', races:204, wins:23, poles:24, pods:60,  ppr:2.58},
+  {code:'LEC', full:'Charles Leclerc',    ctor:'Ferrari',              flag:'MCO', races:142, wins:8,  poles:26, pods:42,  ppr:5.10},
+  {code:'NOR', full:'Lando Norris',       ctor:'McLaren',              flag:'GBR', races:128, wins:4,  poles:8,  pods:24,  ppr:4.55},
+  {code:'PER', full:'Sergio Pérez',       ctor:'Red Bull · Racing P.', flag:'MEX', races:280, wins:6,  poles:3,  pods:39,  ppr:2.46},
+  {code:'SAI', full:'Carlos Sainz Jr.',   ctor:'Ferrari · McLaren',    flag:'ESP', races:213, wins:4,  poles:6,  pods:27,  ppr:2.31},
+  {code:'RUS', full:'George Russell',     ctor:'Mercedes',             flag:'GBR', races:133, wins:3,  poles:5,  pods:18,  ppr:2.91},
+  {code:'PIA', full:'Oscar Piastri',      ctor:'McLaren',              flag:'AUS', races:69,  wins:2,  poles:1,  pods:14,  ppr:3.45},
+  {code:'BOT', full:'Valtteri Bottas',    ctor:'Mercedes · Sauber',    flag:'FIN', races:243, wins:10, poles:20, pods:67,  ppr:2.41},
+  {code:'RIC', full:'Daniel Ricciardo',   ctor:'Red Bull · McLaren',   flag:'AUS', races:257, wins:8,  poles:3,  pods:32,  ppr:2.04},
+  {code:'GAS', full:'Pierre Gasly',       ctor:'Alpine · AlphaTauri',  flag:'FRA', races:163, wins:1,  poles:0,  pods:5,   ppr:1.40},
+  {code:'OCO', full:'Esteban Ocon',       ctor:'Alpine',               flag:'FRA', races:160, wins:1,  poles:0,  pods:4,   ppr:1.30},
+  {code:'STR', full:'Lance Stroll',       ctor:'Aston Martin',         flag:'CAN', races:170, wins:0,  poles:1,  pods:3,   ppr:1.15}
+];
+
+/* ============================================================
+   STATE + helpers
+   ============================================================ */
+var stats = {
+  rows: 0, bytes: 0, slot: 0, cost: 0, pct: 0,
+  startMs: Date.now(),
+  TARGET_ROWS: 1100000
+};
+
+function fmtNum(n){ return Math.round(n).toLocaleString(); }
+function fmtMB(n){ return (n / 1e6).toFixed(1); }
+
+function updateKPIs(){
+  document.getElementById('kpi-rows').textContent = fmtNum(stats.rows);
+  document.getElementById('kpi-bytes').innerHTML = '<span>' + fmtMB(stats.bytes) + '</span><span class="u">MB</span>';
+  document.getElementById('kpi-slot').innerHTML = '<span>' + fmtNum(stats.slot) + '</span><span class="u">ms</span>';
+  document.getElementById('kpi-cost').innerHTML = '<span>$' + stats.cost.toFixed(3) + '</span>';
+  var pct = Math.min(100, stats.pct);
+  document.getElementById('scan-pct').textContent = pct.toFixed(0) + '%';
+  document.getElementById('scan-fill').style.width = pct + '%';
+  document.getElementById('sb-bar').style.width = pct + '%';
+  document.getElementById('sb-pct').textContent = pct.toFixed(0) + '%';
+  /* exec strip */
+  document.getElementById('ex-rows').textContent = fmtNum(stats.rows);
+  document.getElementById('ex-bytes').textContent = fmtMB(stats.bytes) + ' MB';
+  document.getElementById('ex-slot').textContent = fmtNum(stats.slot);
+}
+
+function updateClock(){
+  var elapsed = (Date.now() - stats.startMs);
+  var s = Math.floor(elapsed / 1000);
+  var ms = elapsed % 1000;
+  var m = Math.floor(s / 60);
+  s = s % 60;
+  document.getElementById('sb-clock').textContent =
+    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + '.' + String(ms).padStart(3,'0');
+  document.getElementById('ex-time').textContent =
+    (elapsed/1000).toFixed(2) + 's';
+}
+setInterval(updateClock, 60);
+
+/* ============================================================
+   PHASE 1 — type SQL
+   ============================================================ */
+var phase = 'typing';
+var running = true;
+
+function typeNextLine(){
+  if (!running) return;
+  if (typedLines >= TOTAL_LINES){
+    document.getElementById('qr-status').innerHTML = '<span class="running">running…</span>';
+    /* small ramp on stage indicator */
+    setTimeout(function(){ runStage('stage 1/4 · scanning f1_archive.results'); }, 200);
+    setTimeout(function(){ runStage('stage 2/4 · joining drivers + constructors'); }, 1100);
+    setTimeout(function(){ runStage('stage 3/4 · grouping + aggregating'); }, 2400);
+    setTimeout(function(){ runStage('stage 4/4 · sorting + LIMIT 25'); }, 3600);
+    setTimeout(function(){
+      document.getElementById('qr-status').innerHTML = '<span style="color:#27c93f;display:flex;align-items:center;gap:5px"><span style="width:6px;height:6px;border-radius:50%;background:#27c93f;display:inline-block;box-shadow:0 0 0 3px rgba(39,201,63,0.18)"></span>complete</span>';
+      document.getElementById('scan-stage').textContent = 'complete · cached';
+      document.getElementById('scan-eta').textContent = '';
+    }, 4500);
+    phase = 'running';
+    setTimeout(streamRow, 350);
+    setTimeout(tickStats, 60);
+    return;
+  }
+  typedLines++;
+  renderCode(typedLines);
+  var l = SOURCE[typedLines - 1];
+  var delay = l.length === 0 ? 60 : 70 + Math.random() * 90;
+  setTimeout(typeNextLine, delay);
+}
+
+function runStage(text){
+  document.getElementById('scan-stage').textContent = text;
+}
+
+/* ============================================================
+   PHASE 2 — stream result rows + grow stats
+   ============================================================ */
+var rtBody = document.getElementById('rt-body');
+var rowIdx = 0;
+var maxRows = 16; /* visible cap */
+
+function streamRow(){
+  if (!running || phase !== 'running') return;
+  if (rowIdx >= DRIVERS.length){
+    return;
+  }
+  var d = DRIVERS[rowIdx++];
+  var row = document.createElement('div');
+  row.className = 'rt-row fresh';
+  row.innerHTML =
+    '<span class="rn">' + rowIdx + '</span>' +
+    '<span class="driver"><span class="flag f-' + d.flag + '"></span>' + d.full + '</span>' +
+    '<span class="ctor">' + d.ctor + '</span>' +
+    '<span class="num-c">' + d.races + '</span>' +
+    '<span class="num-c">' + d.wins + '</span>' +
+    '<span class="num-c">' + d.poles + '</span>' +
+    '<span class="num-c">' + d.pods + '</span>' +
+    '<span class="pos">' + d.ppr.toFixed(2) + '</span>';
+  rtBody.appendChild(row);
+  /* auto-scroll: keep latest visible */
+  rtBody.scrollTop = rtBody.scrollHeight;
+  setTimeout(function(){ row.classList.remove('fresh'); }, 1200);
+
+  /* update leaderboard with top 5 by ppr */
+  updateLeaderboard();
+
+  if (rowIdx < DRIVERS.length){
+    setTimeout(streamRow, 130 + Math.random() * 80);
+  } else {
+    document.getElementById('lb-meta').textContent = 'live · 25 rows';
+  }
+}
+
+/* leaderboard top 5 by ppr */
+function updateLeaderboard(){
+  var cur = DRIVERS.slice(0, rowIdx);
+  var top = cur.slice().sort(function(a,b){ return b.ppr - a.ppr; }).slice(0,5);
+  var lb = document.getElementById('lboard');
+  lb.innerHTML = top.map(function(d, i){
+    return '<div class="lrow p' + (i+1) + '">' +
+      '<span class="pos">' + (i+1) + '</span>' +
+      '<span class="nm"><span class="flag f-' + d.flag + '"></span>' + d.full + '</span>' +
+      '<span class="vw">' + d.ppr.toFixed(2) + '</span>' +
+    '</div>';
+  }).join('');
+  document.getElementById('lb-meta').textContent = rowIdx + '/25 streamed';
+}
+
+/* ============================================================
+   STATS TICK — bytes/rows/slot/cost grow during query
+   ============================================================ */
+function tickStats(){
+  if (!running || phase !== 'running') return;
+  if (stats.pct >= 100){ updateKPIs(); return; }
+
+  /* sigmoid-ish ramp */
+  var step = 1.5 + Math.random() * 2.5;
+  stats.pct = Math.min(100, stats.pct + step);
+  /* row scan grows fast then plateaus */
+  var t = stats.pct / 100;
+  stats.rows = Math.min(stats.TARGET_ROWS, Math.floor(t * stats.TARGET_ROWS * (0.95 + Math.random() * 0.1)));
+  stats.bytes = stats.rows * 184; /* ~184 B/row */
+  stats.slot = Math.floor(t * 4200 + Math.random() * 80);
+  stats.cost = (stats.bytes / 1e12) * 6.25; /* $6.25/TB on-demand */
+  /* eta */
+  var remaining = (100 - stats.pct);
+  document.getElementById('scan-eta').textContent = remaining > 1
+    ? 'eta ' + (remaining * 0.05).toFixed(1) + 's'
+    : '';
+
+  updateKPIs();
+  setTimeout(tickStats, 90 + Math.random() * 70);
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+function start(){
+  typedLines = 0;
+  stats.rows = 0; stats.bytes = 0; stats.slot = 0; stats.cost = 0; stats.pct = 0;
+  stats.startMs = Date.now();
+  rtBody.innerHTML = ''; document.getElementById('lboard').innerHTML = '';
+  rowIdx = 0;
+  document.getElementById('qr-status').innerHTML = '<span class="running">running…</span>';
+  document.getElementById('scan-stage').textContent = 'queued';
+  renderCode(0);
+  updateKPIs();
+  phase = 'typing';
+  running = true;
+  setTimeout(typeNextLine, 400);
+}
+start();
+
+document.getElementById('replay').addEventListener('click', function(){
+  running = false;
+  setTimeout(start, 100);
+});
+</script>
+
+</body>
+</html>

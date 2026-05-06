@@ -586,6 +586,27 @@
     }
     .btn-ghost:hover { border-color: var(--text3); transform: translateY(-2px); }
 
+    /* ====== LIVE DEMO ====== */
+    #live-demo { border-bottom: 1px solid var(--border); }
+    .live-demo-wrap {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(232,0,61,0.25);
+      box-shadow: 0 0 60px -10px rgba(232,0,61,0.15), 0 0 0 1px rgba(232,0,61,0.04);
+      aspect-ratio: 16/9;
+      background: #08090a;
+    }
+    .live-demo-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+    .live-demo-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 12px; border-radius: 20px;
+      background: rgba(232,0,61,0.08); border: 1px solid rgba(232,0,61,0.2);
+      color: #e8003d; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+    }
+    .live-demo-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #e8003d; box-shadow: 0 0 0 3px rgba(232,0,61,0.2); animation: pulse-r 1.4s ease-in-out infinite; }
+    @keyframes pulse-r { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)} }
+
     /* ====== FOOTER ====== */
     footer {
       border-top: 1px solid var(--border);
@@ -746,6 +767,18 @@
         <div class="pill"><div class="pill-dot" style="background:#f0b429"></div>SQL Avancé</div>
         <div class="pill"><div class="pill-dot" style="background:#00d4ff"></div>CTEs &amp; Window Functions</div>
         <div class="pill"><div class="pill-dot" style="background:#7b2fff"></div>Data Storytelling</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== LIVE DEMO ====== -->
+  <section id="live-demo">
+    <div class="container">
+      <div class="section-label fade-in">Simulation</div>
+      <h2 class="section-title fade-in">La requête SQL en action</h2>
+      <div class="live-demo-badge fade-in">LIVE SIMULATION</div>
+      <div class="live-demo-wrap fade-in">
+        <iframe src="f1-live.html" title="F1 archive — live SQL query" loading="lazy" scrolling="no"></iframe>
       </div>
     </div>
   </section>
