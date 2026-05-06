@@ -141,6 +141,31 @@
     .btn-ghost { padding: 12px 26px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 0.88rem; transition: border-color 0.2s, transform 0.2s; display: inline-flex; align-items: center; gap: 8px; }
     .btn-ghost:hover { border-color: var(--text3); transform: translateY(-2px); }
 
+    /* ====== LIVE DEMO ====== */
+    #live-demo { border-bottom: 1px solid var(--border); }
+    .live-demo-wrap {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(123,47,255,0.3);
+      box-shadow: 0 0 60px -10px rgba(123,47,255,0.18), 0 0 0 1px rgba(0,255,136,0.04);
+      aspect-ratio: 16/9;
+      background: #08090a;
+      position: relative;
+    }
+    .live-demo-wrap iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+    .live-demo-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 12px; border-radius: 20px;
+      background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.2);
+      color: #00ff88; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+    }
+    .live-demo-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 0 3px rgba(0,255,136,0.2); animation: pulse-g 1.4s ease-in-out infinite; }
+    @keyframes pulse-g { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)} }
+
     /* ====== FOOTER ====== */
     footer { border-top: 1px solid var(--border); padding: 2rem 5%; text-align: center; font-size: 0.8rem; color: var(--text3); }
     footer span { color: var(--text2); }
@@ -258,6 +283,65 @@
           <span class="meta-label">GitHub</span>
           <span class="meta-value"><a href="https://github.com/jeanlisek/Python-Scrapping-Project-DISCOGS" target="_blank" style="color:var(--purple2);text-decoration:underline;">Voir le repo ↗</a></span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== GALERIE ====== -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-label fade-in">Présentation</div>
+      <h2 class="section-title fade-in">Extraits de la présentation</h2>
+      <div class="gallery-grid fade-in">
+
+        <div class="gallery-item" onclick="openLightbox(0)">
+          <img src="assets/discogs-cover.png" alt="Cover — Scraping et Analyse Discogs" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Présentation du projet</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(1)">
+          <img src="assets/discogs-donnees.png" alt="Les données cibles" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Les données cibles</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(2)">
+          <img src="assets/discogs-logique.png" alt="La Logique du Scraping" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">La logique du scraping</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(3)">
+          <img src="assets/discogs-albums.png" alt="Pochettes albums" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Pochettes d'albums</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(4)">
+          <img src="assets/discogs-formats.png" alt="Format Dominant" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Format dominant</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox(5)">
+          <img src="assets/discogs-prix.png" alt="Accessibilité du matérialisme musical" />
+          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
+          <div class="gallery-caption">Accessibilité du matérialisme musical</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== LIVE DEMO ====== -->
+  <section id="live-demo">
+    <div class="container">
+      <div class="section-label fade-in">Simulation</div>
+      <h2 class="section-title fade-in">Le scraper en action</h2>
+      <div class="live-demo-badge fade-in">LIVE SIMULATION</div>
+      <div class="live-demo-wrap fade-in">
+        <iframe src="discogs-live.html" title="Discogs scraper — live simulation" loading="lazy" scrolling="no"></iframe>
       </div>
     </div>
   </section>
@@ -409,53 +493,6 @@
         </div>
       </div>
 
-    </div>
-  </section>
-
-  <!-- ====== GALERIE ====== -->
-  <section id="gallery">
-    <div class="container">
-      <div class="section-label fade-in">Présentation</div>
-      <h2 class="section-title fade-in">Extraits de la présentation</h2>
-      <div class="gallery-grid fade-in">
-
-        <div class="gallery-item" onclick="openLightbox(0)">
-          <img src="assets/discogs-cover.png" alt="Cover — Scraping et Analyse Discogs" />
-          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
-          <div class="gallery-caption">Présentation du projet</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox(1)">
-          <img src="assets/discogs-donnees.png" alt="Les données cibles" />
-          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
-          <div class="gallery-caption">Les données cibles</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox(2)">
-          <img src="assets/discogs-logique.png" alt="La Logique du Scraping" />
-          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
-          <div class="gallery-caption">La logique du scraping</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox(3)">
-          <img src="assets/discogs-albums.png" alt="Pochettes albums" />
-          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
-          <div class="gallery-caption">Pochettes d'albums</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox(4)">
-          <img src="assets/discogs-formats.png" alt="Format Dominant" />
-          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
-          <div class="gallery-caption">Format dominant</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox(5)">
-          <img src="assets/discogs-prix.png" alt="Accessibilité du matérialisme musical" />
-          <div class="gallery-overlay"><span class="gallery-overlay-icon">⤢</span></div>
-          <div class="gallery-caption">Accessibilité du matérialisme musical</div>
-        </div>
-
-      </div>
     </div>
   </section>
 

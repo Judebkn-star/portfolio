@@ -666,6 +666,75 @@
     </div>
   </section>
 
+  <!-- ====== DASHBOARDS ====== -->
+  <section id="dashboards">
+    <div class="container">
+      <div class="section-label fade-in">Visualisations</div>
+      <h2 class="section-title fade-in">Dashboards Tableau</h2>
+
+      <div class="dashboard-list">
+
+        <!-- Dashboard 1 -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-meta">
+            <div>
+              <div class="dashboard-num">Dashboard 01</div>
+              <div class="dashboard-title">75 ans de Formule 1 — L'Histoire en chiffres</div>
+            </div>
+          </div>
+          <p class="dashboard-desc">
+            Vue d'ensemble historique : 1 128 Grand Prix, 75 saisons, 841 pilotes, 212 constructeurs.
+            Répartition géographique des pilotes, évolution du calendrier, top pilotes et constructeurs all-time.
+          </p>
+          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-histoire.png')">
+            <img src="assets/dashboard-histoire.png" alt="Dashboard 75 ans de F1" loading="lazy" />
+          </div>
+        </div>
+
+        <!-- Dashboard 2 -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-meta">
+            <div>
+              <div class="dashboard-num">Dashboard 02</div>
+              <div class="dashboard-title">Décennies, Domination &amp; Stratégie</div>
+            </div>
+          </div>
+          <p class="dashboard-desc">
+            Analyse des cycles de domination par décennie et par constructeur.
+            Carte des circuits, victoires par nationalité, parcours des pilotes et ADN stratégique des circuits.
+          </p>
+          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-decennies.png')">
+            <img src="assets/dashboard-decennies.png" alt="Dashboard Décennies et Domination" loading="lazy" />
+          </div>
+        </div>
+
+        <!-- Dashboard 3 -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-meta">
+            <div>
+              <div class="dashboard-num">Dashboard 03</div>
+              <div class="dashboard-title">Pit Stops &amp; Stratégie — Les Secondes qui Font la Course</div>
+            </div>
+          </div>
+          <p class="dashboard-desc">
+            Étude approfondie des stratégies d'arrêt : durée moyenne par écurie, fenêtre optimale (tours 21-30),
+            corrélation entre nombre d'arrêts et position finale, scatter podiums vs victoires.
+          </p>
+          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-pitstops.png')">
+            <img src="assets/dashboard-pitstops.png" alt="Dashboard Pit Stops et Stratégie" loading="lazy" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
   <!-- ====== TECH STACK ====== -->
   <section id="stack">
     <div class="container">
@@ -853,75 +922,6 @@ ORDER BY saison DESC, duree_moy_sec ASC;</pre>
 
     </div>
   </section>
-
-  <!-- ====== DASHBOARDS ====== -->
-  <section id="dashboards">
-    <div class="container">
-      <div class="section-label fade-in">Visualisations</div>
-      <h2 class="section-title fade-in">Dashboards Tableau</h2>
-
-      <div class="dashboard-list">
-
-        <!-- Dashboard 1 -->
-        <div class="dashboard-item fade-in">
-          <div class="dashboard-meta">
-            <div>
-              <div class="dashboard-num">Dashboard 01</div>
-              <div class="dashboard-title">75 ans de Formule 1 — L'Histoire en chiffres</div>
-            </div>
-          </div>
-          <p class="dashboard-desc">
-            Vue d'ensemble historique : 1 128 Grand Prix, 75 saisons, 841 pilotes, 212 constructeurs.
-            Répartition géographique des pilotes, évolution du calendrier, top pilotes et constructeurs all-time.
-          </p>
-          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-histoire.png')">
-            <img src="assets/dashboard-histoire.png" alt="Dashboard 75 ans de F1" loading="lazy" />
-          </div>
-        </div>
-
-        <!-- Dashboard 2 -->
-        <div class="dashboard-item fade-in">
-          <div class="dashboard-meta">
-            <div>
-              <div class="dashboard-num">Dashboard 02</div>
-              <div class="dashboard-title">Décennies, Domination &amp; Stratégie</div>
-            </div>
-          </div>
-          <p class="dashboard-desc">
-            Analyse des cycles de domination par décennie et par constructeur.
-            Carte des circuits, victoires par nationalité, parcours des pilotes et ADN stratégique des circuits.
-          </p>
-          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-decennies.png')">
-            <img src="assets/dashboard-decennies.png" alt="Dashboard Décennies et Domination" loading="lazy" />
-          </div>
-        </div>
-
-        <!-- Dashboard 3 -->
-        <div class="dashboard-item fade-in">
-          <div class="dashboard-meta">
-            <div>
-              <div class="dashboard-num">Dashboard 03</div>
-              <div class="dashboard-title">Pit Stops &amp; Stratégie — Les Secondes qui Font la Course</div>
-            </div>
-          </div>
-          <p class="dashboard-desc">
-            Étude approfondie des stratégies d'arrêt : durée moyenne par écurie, fenêtre optimale (tours 21-30),
-            corrélation entre nombre d'arrêts et position finale, scatter podiums vs victoires.
-          </p>
-          <div class="dashboard-img-wrap" onclick="openLightbox('assets/dashboard-pitstops.png')">
-            <img src="assets/dashboard-pitstops.png" alt="Dashboard Pit Stops et Stratégie" loading="lazy" />
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Lightbox -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
-    <img id="lightbox-img" src="" alt="" />
-  </div>
 
   <!-- ====== INSIGHTS ====== -->
   <section id="insights">

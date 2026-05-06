@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>discogs_scraper · live run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'JetBrains Mono', ui-monospace, monospace;
+  background:#08090a;
+  color:#e6edf3;
+  font-size:13px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Stage = 1280x720 cinematic, scaled to fit viewport */
+.stage{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 20%, #0c1014, #050607 80%);
+}
+.frame{
+  width:1280px;height:720px;
+  display:flex;flex-direction:column;
+  background:#0a0c0f;
+  border:1px solid #1a1f27;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 60px 140px -30px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,255,136,0.05);
+  transform-origin:center center;
+}
+
+/* window chrome */
+.chrome{
+  display:flex;align-items:center;gap:14px;
+  padding:10px 16px;
+  background:#0d1014;
+  border-bottom:1px solid #1a1f27;
+  font-size:11px;
+}
+.dots{display:flex;gap:6px}
+.dots i{width:11px;height:11px;border-radius:50%;display:block}
+.dots i:nth-child(1){background:#ff5f56}
+.dots i:nth-child(2){background:#ffbd2e}
+.dots i:nth-child(3){background:#27c93f}
+.tabs{display:flex;gap:4px;margin-left:14px}
+.tab{
+  padding:5px 12px;border-radius:5px 5px 0 0;
+  color:#6b7480;background:transparent;
+  border:1px solid transparent;border-bottom:0;
+  display:flex;align-items:center;gap:6px;
+}
+.tab.on{color:#e6edf3;background:#0a0c0f;border-color:#1a1f27}
+.tab .lang{color:#00ff88;font-size:9px}
+.title{
+  margin-left:auto;color:#6b7480;font-size:11px;
+  display:flex;align-items:center;gap:10px;
+}
+.title .live{color:#00ff88;display:flex;align-items:center;gap:6px}
+.title .live::before{content:"";width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 0 3px rgba(0,255,136,0.18);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
+
+/* main grid: editor / runner / stats */
+.body{
+  flex:1;
+  display:grid;
+  grid-template-columns:1.05fr 1.35fr 0.85fr;
+  min-height:0;
+}
+.pane{
+  display:flex;flex-direction:column;
+  border-right:1px solid #1a1f27;
+  min-height:0;
+}
+.pane:last-child{border-right:0}
+.pane-h{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px;
+  background:#0c0f13;
+  border-bottom:1px solid #1a1f27;
+  font-size:10.5px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase;
+}
+.pane-h .b{
+  width:18px;height:18px;border-radius:4px;
+  background:#11151b;border:1px solid #1f2630;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:#00ff88;font-weight:600;font-size:9.5px;
+}
+.pane-h .right{margin-left:auto;color:#4d5560;font-size:10px}
+
+/* ----- pane 1: editor ----- */
+.editor{
+  flex:1;
+  display:grid;
+  grid-template-columns:32px 1fr;
+  min-height:0;
+  overflow:hidden;
+  font-size:12px;
+  background:linear-gradient(180deg, #0a0c0f 0%, #0c0f13 100%);
+}
+.gutter{
+  padding:10px 0;
+  text-align:right;
+  font-size:10.5px;
+  color:#3d434d;
+  user-select:none;
+  background:#09 0b0e;
+  border-right:1px solid #14181f;
+}
+.gutter span{display:block;line-height:1.6;padding-right:8px}
+.code{
+  padding:10px 12px;
+  white-space:pre;
+  line-height:1.6;
+  overflow:hidden;
+  position:relative;
+}
+.code .ln{display:block;min-height:1.6em}
+.code .hl{background:rgba(0,255,136,0.06);margin:0 -12px;padding:0 12px}
+.cursor{
+  display:inline-block;width:7px;height:1em;
+  background:#00ff88;vertical-align:-2px;
+  margin-left:1px;
+  animation:blink 1s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+.kw{color:#ff7eb6}
+.fn{color:#82aaff}
+.str{color:#a3e635}
+.num{color:#ffb627}
+.cm{color:#4d5560;font-style:italic}
+.id{color:#e6edf3}
+.op{color:#9aa5b1}
+.dec{color:#c084fc}
+
+/* ----- pane 2: runner ----- */
+.runner{
+  flex:1;
+  padding:12px 14px;
+  overflow:hidden;
+  font-size:12px;
+  line-height:1.55;
+  display:flex;flex-direction:column;
+  gap:1px;
+}
+.runner .line{
+  display:flex;gap:8px;align-items:flex-start;
+  padding:1px 0;
+  white-space:nowrap;
+}
+.runner .ts{color:#3d434d;flex-shrink:0;font-size:10.5px}
+.runner .lvl{flex-shrink:0;font-weight:600;font-size:10.5px;width:48px}
+.runner .lvl-info{color:#5b9dff}
+.runner .lvl-ok{color:#00ff88}
+.runner .lvl-warn{color:#ffb627}
+.runner .lvl-err{color:#ff5f56}
+.runner .lvl-net{color:#b78aff}
+.runner .lvl-db{color:#00ff88}
+.runner .msg{color:#c9d1d9;flex:1;overflow:hidden;text-overflow:ellipsis}
+.runner .msg .k{color:#8b949e}
+.runner .msg .v{color:#e6edf3}
+.runner .msg .url{color:#7ee787}
+.runner .msg .id{color:#ffb627}
+.runner .msg .ms{color:#5b9dff}
+.runner .msg .err{color:#ff7b72}
+
+/* ----- pane 3: stats ----- */
+.stats{
+  flex:1;
+  padding:12px 14px;
+  display:flex;flex-direction:column;gap:14px;
+  overflow:hidden;
+  background:linear-gradient(180deg, #0a0c0f 0%, #090b0e 100%);
+}
+.kpi-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.kpi{
+  border:1px solid #1a1f27;border-radius:6px;
+  padding:10px 12px;
+  background:#0c0f13;
+}
+.kpi-l{font-size:9.5px;color:#6b7480;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+.kpi-v{font-size:18px;color:#e6edf3;font-weight:600;letter-spacing:-0.01em;display:flex;align-items:baseline;gap:4px}
+.kpi-v .u{font-size:10px;color:#6b7480;font-weight:400}
+.kpi-v.ok{color:#00ff88}
+.kpi-v.warn{color:#ffb627}
+
+.bar-block{
+  border:1px solid #1a1f27;border-radius:6px;
+  padding:12px;background:#0c0f13;
+}
+.bar-l{display:flex;justify-content:space-between;font-size:10px;color:#6b7480;margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase}
+.bar-l .v{color:#00ff88;font-weight:600}
+.bar{
+  height:6px;background:#11151b;border-radius:3px;overflow:hidden;
+  border:1px solid #14181f;
+}
+.bar i{
+  display:block;height:100%;
+  background:linear-gradient(90deg, #00ff88, #00b865);
+  border-radius:3px;
+  box-shadow:0 0 8px rgba(0,255,136,0.4);
+  width:0%;
+  transition:width 0.4s linear;
+}
+.bar-foot{display:flex;justify-content:space-between;font-size:10px;color:#6b7480;margin-top:6px}
+
+/* mini chart */
+.spark{
+  border:1px solid #1a1f27;border-radius:6px;
+  padding:10px 12px 6px;background:#0c0f13;
+  flex:1;display:flex;flex-direction:column;gap:6px;min-height:0;
+}
+.spark-h{display:flex;justify-content:space-between;font-size:10px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase}
+.spark-h .v{color:#5b9dff;font-weight:600}
+.spark-svg{flex:1;width:100%;min-height:0}
+
+/* db table */
+.db{
+  border:1px solid #1a1f27;border-radius:6px;
+  background:#0c0f13;overflow:hidden;
+}
+.db-h{
+  display:flex;justify-content:space-between;
+  padding:8px 12px;border-bottom:1px solid #1a1f27;
+  font-size:10px;color:#6b7480;letter-spacing:0.06em;text-transform:uppercase;
+}
+.db-h .v{color:#00ff88}
+.db-rows{
+  font-size:10.5px;
+  display:flex;flex-direction:column;
+}
+.db-row{
+  display:grid;grid-template-columns:38px 1fr 50px;gap:8px;
+  padding:5px 12px;
+  border-bottom:1px dashed #14181f;
+  color:#9aa5b1;
+}
+.db-row:last-child{border-bottom:0}
+.db-row .id{color:#ffb627;font-weight:500}
+.db-row .nm{color:#e6edf3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.db-row .pr{color:#00ff88;text-align:right}
+.db-row.new{background:rgba(0,255,136,0.05);animation:flash 1s ease-out}
+@keyframes flash{0%{background:rgba(0,255,136,0.18)}100%{background:rgba(0,255,136,0.05)}}
+
+/* bottom status bar */
+.statusbar{
+  display:flex;align-items:center;gap:0;
+  padding:0;
+  background:#0d1014;
+  border-top:1px solid #1a1f27;
+  font-size:10.5px;
+}
+.sb-cell{
+  padding:7px 14px;
+  display:flex;align-items:center;gap:8px;
+  border-right:1px solid #1a1f27;
+  color:#6b7480;
+}
+.sb-cell strong{color:#e6edf3;font-weight:500}
+.sb-cell.ok{color:#00ff88}
+.sb-cell.ok::before{content:"●";font-size:8px}
+.sb-cell.git{color:#a3bdff}
+.sb-progress{
+  flex:1;display:flex;align-items:center;gap:10px;
+  padding:0 14px;
+}
+.sb-progress .lbl{color:#6b7480}
+.sb-progress .barx{
+  flex:1;height:4px;background:#11151b;border-radius:2px;overflow:hidden;
+  border:1px solid #14181f;
+}
+.sb-progress .barx i{display:block;height:100%;background:linear-gradient(90deg, #00ff88, #5b9dff);width:0%;transition:width 0.4s linear}
+.sb-progress .pct{color:#00ff88;font-weight:600;min-width:40px;text-align:right}
+.sb-cell.right{margin-left:auto;border-right:0;border-left:1px solid #1a1f27;color:#5b9dff}
+
+/* play/pause overlay button */
+.replay{
+  position:fixed;bottom:18px;right:18px;
+  z-index:10;
+  padding:8px 14px;
+  background:#0c0f13;border:1px solid #1a1f27;border-radius:6px;
+  color:#9aa5b1;font:500 11px/1 'JetBrains Mono', monospace;
+  cursor:pointer;display:flex;align-items:center;gap:8px;
+  letter-spacing:0.04em;
+}
+.replay:hover{color:#00ff88;border-color:#00ff88}
+.replay::before{content:"↻";color:#00ff88}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <div class="frame" id="frame">
+
+    <!-- Window chrome -->
+    <div class="chrome">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <div class="tabs">
+        <div class="tab on"><span class="lang">PY</span> scraper.py</div>
+        <div class="tab"><span class="lang">PY</span> parser.py</div>
+        <div class="tab"><span class="lang">SQL</span> schema.sql</div>
+      </div>
+      <div class="title">
+        <span>discogs_scraper</span>
+        <span>·</span>
+        <span class="live">LIVE</span>
+      </div>
+    </div>
+
+    <!-- 3-pane body -->
+    <div class="body">
+
+      <!-- editor -->
+      <div class="pane">
+        <div class="pane-h">
+          <span class="b">PY</span>
+          <span>~/discogs_scraper/scraper.py</span>
+          <span class="right">UTF-8 · LF</span>
+        </div>
+        <div class="editor">
+          <div class="gutter" id="gutter"></div>
+          <div class="code" id="code"></div>
+        </div>
+      </div>
+
+      <!-- runner -->
+      <div class="pane">
+        <div class="pane-h">
+          <span class="b">SH</span>
+          <span>$ python -m discogs_scraper.run --workers 32</span>
+          <span class="right" id="runner-meta">PID 8421 · 32 workers</span>
+        </div>
+        <div class="runner" id="runner"></div>
+      </div>
+
+      <!-- stats -->
+      <div class="pane">
+        <div class="pane-h">
+          <span class="b">DB</span>
+          <span>postgres://discogs_raw</span>
+          <span class="right" id="db-meta">conn ok</span>
+        </div>
+        <div class="stats">
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-l">RECORDS</div>
+              <div class="kpi-v ok" id="kpi-records">0</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">REQ/SEC</div>
+              <div class="kpi-v" id="kpi-rps">0</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">LATENCY p50</div>
+              <div class="kpi-v" id="kpi-lat"><span>—</span><span class="u">ms</span></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-l">RETRIES</div>
+              <div class="kpi-v warn" id="kpi-retry">0</div>
+            </div>
+          </div>
+
+          <div class="bar-block">
+            <div class="bar-l"><span>CRAWL PROGRESS</span><span class="v" id="bar-pct">0%</span></div>
+            <div class="bar"><i id="bar-fill"></i></div>
+            <div class="bar-foot"><span id="bar-rate">— rec/s</span><span id="bar-eta">eta —</span></div>
+          </div>
+
+          <div class="spark">
+            <div class="spark-h"><span>THROUGHPUT (60s)</span><span class="v" id="spark-now">—</span></div>
+            <svg class="spark-svg" id="spark" viewBox="0 0 240 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00ff88" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <polygon id="spark-fill" points="" fill="url(#sg)"/>
+              <polyline id="spark-line" points="" fill="none" stroke="#00ff88" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <div class="db">
+            <div class="db-h"><span>RECENT INSERTS · discogs_raw.records</span><span class="v" id="db-count">0</span></div>
+            <div class="db-rows" id="db-rows"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- bottom status bar -->
+    <div class="statusbar">
+      <div class="sb-cell ok"> <strong>online</strong></div>
+      <div class="sb-cell git">⎇ <strong>main</strong> · 7d9b401</div>
+      <div class="sb-cell">env: <strong>prod</strong></div>
+      <div class="sb-cell">pool: <strong id="sb-pool">32 / 32</strong></div>
+      <div class="sb-progress">
+        <span class="lbl">crawl</span>
+        <div class="barx"><i id="sb-bar"></i></div>
+        <span class="pct" id="sb-pct">0%</span>
+      </div>
+      <div class="sb-cell right" id="sb-clock">00:00:00</div>
+    </div>
+
+  </div>
+</div>
+
+<button class="replay" id="replay">replay</button>
+
+<script>
+/* ============================================================
+   STAGE — scale 1280x720 to fit viewport
+   ============================================================ */
+function fit(){
+  var f = document.getElementById('frame');
+  var pad = 32;
+  var sx = (window.innerWidth - pad) / 1280;
+  var sy = (window.innerHeight - pad) / 720;
+  var s = Math.min(sx, sy, 1);
+  f.style.transform = 'scale(' + s + ')';
+}
+window.addEventListener('resize', fit);
+fit();
+
+/* ============================================================
+   CODE EDITOR — tokenized python source, types char by char
+   ============================================================ */
+var SOURCE = [
+  ['cm', '# discogs_scraper/scraper.py'],
+  ['cm', '# async crawler · 1.2M records · postgres pipeline'],
+  [],
+  ['kw','import',' ','asyncio'],
+  ['kw','import',' ','aiohttp'],
+  ['kw','from',' ','bs4 ',' ','kw','import',' ','BeautifulSoup'],
+  ['kw','from',' ','asyncpg ',' ','kw','import',' ','create_pool'],
+  ['kw','from',' ','tenacity ',' ','kw','import',' ','retry, stop_after_attempt'],
+  [],
+  ['dec','@retry','(','id','stop=','fn','stop_after_attempt','(','num','5','))'],
+  ['kw','async ','kw','def ','fn','fetch','(','id','session, url','op','):'],
+  ['  ','kw','async ','kw','with',' ','id','session.','fn','get','(','id','url, ','id','timeout=','num','15',') ','kw','as',' ','id','r','op',':'],
+  ['    ','id','r.','fn','raise_for_status','()'],
+  ['    ','kw','return ','kw','await ','id','r.','fn','text','()'],
+  [],
+  ['kw','async ','kw','def ','fn','parse_release','(','id','html, slug','op','):'],
+  ['  ','id','soup ','op','= ','fn','BeautifulSoup','(','id','html, ','str','"lxml"',')'],
+  ['  ','kw','return ','op','{'],
+  ['    ','str','"slug"','op',': ','id','slug,'],
+  ['    ','str','"artist"','op',': ','id','soup.','fn','select_one','(','str','"h1.artist"',').','id','text.','fn','strip','(),'],
+  ['    ','str','"title"','op',': ','id','soup.','fn','select_one','(','str','"h1.title"',').','id','text.','fn','strip','(),'],
+  ['    ','str','"year"','op',': ','fn','int','(','id','soup.','fn','select_one','(','str','".year"',').','id','text','op','),'],
+  ['    ','str','"label"','op',': ','id','soup.','fn','select_one','(','str','".label"',').','id','text,'],
+  ['    ','str','"price"','op',': ','fn','float','(','id','soup.','fn','select_one','(','str','".median"',').','id','text','op','),'],
+  ['    ','str','"rating"','op',': ','fn','float','(','id','soup.','fn','select_one','(','str','".rating"',').','id','text','op',')'],
+  ['  ','op','}'],
+  [],
+  ['kw','async ','kw','def ','fn','worker','(','id','q, session, pool','op','):'],
+  ['  ','kw','while ','kw','True','op',':'],
+  ['    ','id','slug ','op','= ','kw','await ','id','q.','fn','get','()'],
+  ['    ','id','html ','op','= ','kw','await ','fn','fetch','(','id','session, ','fn','URL','(','id','slug','op','))'],
+  ['    ','id','rec  ','op','= ','kw','await ','fn','parse_release','(','id','html, slug','op',')'],
+  ['    ','kw','async ','kw','with ','id','pool.','fn','acquire','() ','kw','as ','id','c','op',':'],
+  ['      ','kw','await ','id','c.','fn','execute','(','id','SQL_INSERT, ','op','**','id','rec','op',')'],
+  ['    ','id','q.','fn','task_done','()']
+];
+
+function buildLine(tokens){
+  /* simple alternating tag/value rendering */
+  var html = '';
+  var i = 0;
+  while (i < tokens.length){
+    var t = tokens[i];
+    /* if token is a recognized class name, next token is value */
+    if (['kw','fn','str','num','cm','dec','op','id'].indexOf(t) >= 0){
+      var v = tokens[i+1] || '';
+      html += '<span class="' + t + '">' + escapeHtml(v) + '</span>';
+      i += 2;
+    } else {
+      html += escapeHtml(t);
+      i += 1;
+    }
+  }
+  return html;
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];
+  });
+}
+
+/* Render code progressively. We treat each line as fully-typed at once
+   for performance, with a "current" highlighted line + cursor. */
+var codeEl = document.getElementById('code');
+var gutterEl = document.getElementById('gutter');
+var TOTAL_LINES = SOURCE.length;
+var typedLines = 0;
+
+function renderCode(upTo){
+  var html = '';
+  var gutter = '';
+  for (var i = 0; i < upTo && i < SOURCE.length; i++){
+    var line = SOURCE[i].length === 0 ? '' : buildLine(SOURCE[i]);
+    var cls = (i === upTo - 1) ? 'ln hl' : 'ln';
+    var cursor = (i === upTo - 1) ? '<span class="cursor"></span>' : '';
+    html += '<span class="' + cls + '">' + (line || '&nbsp;') + cursor + '</span>';
+    gutter += '<span>' + (i + 1) + '</span>';
+  }
+  codeEl.innerHTML = html;
+  gutterEl.innerHTML = gutter;
+}
+
+/* ============================================================
+   RUNNER — log lines stream + scroll
+   ============================================================ */
+var runnerEl = document.getElementById('runner');
+var runnerMax = 22;
+
+function pushLog(level, msg){
+  var d = new Date();
+  var ts = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0') + '.' + String(d.getMilliseconds()).padStart(3,'0').slice(0,3);
+  var lvlMap = {info:'lvl-info', ok:'lvl-ok', warn:'lvl-warn', err:'lvl-err', net:'lvl-net', db:'lvl-db'};
+  var lvlText = {info:'INFO ', ok:'OK   ', warn:'WARN ', err:'ERR  ', net:'NET  ', db:'DB   '};
+  var line = document.createElement('div');
+  line.className = 'line';
+  line.innerHTML = '<span class="ts">' + ts + '</span><span class="lvl ' + lvlMap[level] + '">' + lvlText[level] + '</span><span class="msg">' + msg + '</span>';
+  runnerEl.appendChild(line);
+  while (runnerEl.children.length > runnerMax) runnerEl.removeChild(runnerEl.firstChild);
+}
+
+/* ============================================================
+   STATS state
+   ============================================================ */
+var stats = {
+  records: 0,
+  retries: 0,
+  rps: 0,
+  lat: 0,
+  pct: 0,
+  startMs: Date.now(),
+  TARGET: 1200000
+};
+
+function updateKPIs(){
+  document.getElementById('kpi-records').textContent = stats.records.toLocaleString();
+  document.getElementById('kpi-rps').textContent = stats.rps.toFixed(0);
+  document.getElementById('kpi-lat').innerHTML = '<span>' + stats.lat.toFixed(0) + '</span><span class="u">ms</span>';
+  document.getElementById('kpi-retry').textContent = stats.retries;
+  var pct = Math.min(99.9, (stats.records / stats.TARGET) * 100);
+  document.getElementById('bar-pct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('bar-fill').style.width = pct + '%';
+  document.getElementById('sb-bar').style.width = pct + '%';
+  document.getElementById('sb-pct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('bar-rate').textContent = stats.rps.toFixed(0) + ' rec/s';
+  /* fake ETA */
+  var remaining = stats.TARGET - stats.records;
+  var etaSec = stats.rps > 0 ? remaining / Math.max(stats.rps, 1) : 0;
+  var h = Math.floor(etaSec / 3600);
+  var m = Math.floor((etaSec % 3600) / 60);
+  document.getElementById('bar-eta').textContent = 'eta ' + h + 'h ' + String(m).padStart(2,'0') + 'm';
+  document.getElementById('db-count').textContent = stats.records.toLocaleString();
+  document.getElementById('spark-now').textContent = stats.rps.toFixed(0) + ' rec/s';
+}
+
+/* clock */
+function updateClock(){
+  var elapsed = Math.floor((Date.now() - stats.startMs) / 1000);
+  var h = Math.floor(elapsed / 3600);
+  var m = Math.floor((elapsed % 3600) / 60);
+  var s = elapsed % 60;
+  document.getElementById('sb-clock').textContent =
+    String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+/* sparkline */
+var sparkData = Array(60).fill(0);
+function updateSpark(){
+  sparkData.shift();
+  sparkData.push(stats.rps);
+  var max = Math.max.apply(null, sparkData) || 1;
+  var pts = sparkData.map(function(v, i){
+    var x = (i / 59) * 240;
+    var y = 60 - (v / max) * 52 - 4;
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+  document.getElementById('spark-line').setAttribute('points', pts.join(' '));
+  document.getElementById('spark-fill').setAttribute(
+    'points',
+    '0,60 ' + pts.join(' ') + ' 240,60'
+  );
+}
+
+/* DB rows */
+var dbRowsEl = document.getElementById('db-rows');
+var dbMax = 7;
+function pushDbRow(rec){
+  var row = document.createElement('div');
+  row.className = 'db-row new';
+  row.innerHTML =
+    '<span class="id">#' + rec.id + '</span>' +
+    '<span class="nm">' + rec.artist + ' — <em style="color:#9aa5b1;font-style:normal">' + rec.title + '</em></span>' +
+    '<span class="pr">€' + rec.price.toFixed(2) + '</span>';
+  dbRowsEl.insertBefore(row, dbRowsEl.firstChild);
+  while (dbRowsEl.children.length > dbMax) dbRowsEl.removeChild(dbRowsEl.lastChild);
+  setTimeout(function(){ row.classList.remove('new'); }, 1000);
+}
+
+/* ============================================================
+   FAKE DATA POOLS
+   ============================================================ */
+var ARTISTS = ['Aphex Twin','Boards of Canada','Burial','J Dilla','Madlib','MF DOOM','Daft Punk','Kraftwerk','Massive Attack','Portishead','Radiohead','Flying Lotus','Four Tet','Caribou','Floating Points','Yves Tumor','Sault','Little Simz','Kendrick Lamar','Tyler, the Creator','Dean Blunt','Arca','SOPHIE','Oneohtrix Point Never','James Blake','Thom Yorke','Frank Ocean','Solange','Charli XCX','Beach House','Stereolab','Fela Kuti','Sun Ra','Alice Coltrane','Pharoah Sanders','Donald Byrd','Ahmad Jamal','Bill Evans','Miles Davis','Hiroshi Yoshimura','Mariya Takeuchi','Tatsuro Yamashita','Haruomi Hosono','Ryo Fukui','Joe Hisaishi'];
+var TITLES = ['Selected Ambient Works','Music Has the Right','Untrue','Donuts','Madvillainy','MM..FOOD','Discovery','Trans-Europe Express','Mezzanine','Dummy','Kid A','Cosmogramma','There Is Love in You','Our Love','Crush','Praise A Lord Who Chews','Untitled (Black Is)','Sometimes I Might Be Introvert','To Pimp a Butterfly','IGOR','BLACK METAL','Mutant','Whole New World','Replica','Assume Form','The Eraser','Blonde','When I Get Home','Brat','Bloom','Dots and Loops','Zombie','Space Is The Place','Journey In Satchidananda','Karma','Black Byrd','The Awakening','Sunday at the Village','Kind of Blue','Music for Nine Postcards','Variety','For You','Hosono House','Scenery','Spirited Away OST'];
+var SLUGS = function(a, t){
+  return (a + '-' + t).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+};
+
+function randomRec(id){
+  var a = ARTISTS[Math.floor(Math.random() * ARTISTS.length)];
+  var t = TITLES[Math.floor(Math.random() * TITLES.length)];
+  return {
+    id: id,
+    artist: a,
+    title: t,
+    slug: SLUGS(a, t),
+    price: 4 + Math.random() * 220,
+    year: 1965 + Math.floor(Math.random() * 60),
+    rating: (3 + Math.random() * 2).toFixed(2),
+    ms: 80 + Math.floor(Math.random() * 400)
+  };
+}
+
+/* ============================================================
+   SCHEDULER — drive the whole show
+   ============================================================ */
+var phase = 'typing'; /* typing -> running */
+var running = true;
+
+/* Phase 1: type code */
+function typeNextLine(){
+  if (!running) return;
+  if (typedLines >= TOTAL_LINES){
+    /* done typing — kick off run phase */
+    pushLog('info', '<span class="k">$</span> python -m discogs_scraper.run --workers <span class="v">32</span>');
+    pushLog('info', 'loading config from <span class="v">scraper.yaml</span>');
+    pushLog('info', 'opening db pool: <span class="v">postgres://discogs_raw</span>');
+    pushLog('ok',   'pool ready: <span class="v">8 conns / 32 workers</span>');
+    pushLog('info', 'seeding queue from <span class="url">discogs.com/search?type=release</span>');
+    pushLog('ok',   'queue: <span class="v">1,200,000 slugs</span>');
+    pushLog('info', 'spawning <span class="v">32 workers</span>… <span class="k">go</span>');
+    phase = 'running';
+    setTimeout(tickRunner, 60);
+    return;
+  }
+  typedLines++;
+  renderCode(typedLines);
+  /* variable typing speed */
+  var l = SOURCE[typedLines - 1];
+  var delay = l.length === 0 ? 60 : 80 + Math.random() * 90;
+  setTimeout(typeNextLine, delay);
+}
+
+/* Phase 2: stream logs + update stats */
+var rid = 100000;
+function tickRunner(){
+  if (!running || phase !== 'running') return;
+
+  /* burst N records this tick */
+  var burst = 4 + Math.floor(Math.random() * 4);
+  for (var i = 0; i < burst; i++){
+    var rec = randomRec(rid++);
+    var roll = Math.random();
+
+    if (roll < 0.04){
+      /* retry/timeout */
+      stats.retries++;
+      var atts = 2 + Math.floor(Math.random() * 3);
+      pushLog('warn', 'retry ' + atts + '/5 · <span class="url">/release/' + rec.slug + '</span> · <span class="err">timeout 15s</span>');
+    } else if (roll < 0.06){
+      /* 429 rate limit */
+      pushLog('err', 'HTTP <span class="err">429</span> · backing off <span class="ms">2400ms</span> · <span class="url">/release/' + rec.slug + '</span>');
+    } else if (roll < 0.55){
+      /* GET */
+      pushLog('net', '<span class="k">GET</span> <span class="url">discogs.com/release/' + rec.slug + '</span> → <span class="v">200</span> <span class="ms">' + rec.ms + 'ms</span>');
+    } else if (roll < 0.85){
+      /* parsed */
+      pushLog('ok', 'parsed <span class="id">#' + rec.id + '</span> · <span class="v">' + rec.artist + ' — ' + rec.title + '</span> (' + rec.year + ')');
+    } else {
+      /* db insert */
+      stats.records++;
+      pushLog('db', 'INSERT <span class="k">discogs_raw.records</span> id=<span class="id">' + rec.id + '</span> price=<span class="v">€' + rec.price.toFixed(2) + '</span>');
+      pushDbRow(rec);
+    }
+  }
+
+  /* records always grow a bit even without hitting the "db" branch above */
+  stats.records += 2 + Math.floor(Math.random() * 4);
+
+  /* moving rps + latency */
+  var targetRps = 280 + Math.sin(Date.now() / 4000) * 40 + Math.random() * 30;
+  stats.rps = stats.rps * 0.7 + targetRps * 0.3;
+  stats.lat = 110 + Math.sin(Date.now() / 2200) * 35 + Math.random() * 25;
+
+  updateKPIs();
+  updateSpark();
+
+  setTimeout(tickRunner, 120 + Math.random() * 80);
+}
+
+/* per-second clock & spark even if no tick */
+setInterval(updateClock, 1000);
+setInterval(function(){ if (phase === 'running') updateSpark(); }, 1000);
+
+/* ============================================================
+   START
+   ============================================================ */
+function start(){
+  /* reset */
+  typedLines = 0;
+  stats.records = 0; stats.retries = 0; stats.rps = 0; stats.lat = 0;
+  stats.startMs = Date.now();
+  runnerEl.innerHTML = ''; dbRowsEl.innerHTML = '';
+  sparkData = Array(60).fill(0);
+  renderCode(0);
+  updateKPIs();
+  phase = 'typing';
+  running = true;
+  setTimeout(typeNextLine, 400);
+}
+start();
+
+document.getElementById('replay').addEventListener('click', function(){
+  running = false;
+  setTimeout(start, 100);
+});
+</script>
+
+</body>
+</html>
