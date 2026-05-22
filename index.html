@@ -809,6 +809,253 @@
       background: var(--bg3);
       margin-bottom: 0;
     }
+
+    /* ============================================================
+       ★ FUTURISTE — 3D · Glassmorphism · Neon Layer
+    ============================================================ */
+
+    /* Scanlines subtiles sur tout le site */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.018) 3px, rgba(0,0,0,0.018) 4px
+      );
+      pointer-events: none; z-index: 9999;
+    }
+
+    /* Orbes animés dans le hero */
+    @keyframes orb-drift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(40px,-25px) scale(1.08); }
+      66%      { transform: translate(-25px,20px) scale(0.94); }
+    }
+    .orb { animation: orb-drift 14s ease-in-out infinite; }
+    .orb:nth-child(2) { animation-delay: -5s; animation-duration: 18s; }
+    .orb:nth-child(3) { animation-delay: -9s; animation-duration: 12s; }
+
+    /* Grille 3D perspective dans le hero */
+    .hero-grid-3d {
+      position: absolute; inset: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    .hero-grid-3d-inner {
+      position: absolute;
+      width: 220%; height: 220%;
+      top: 25%; left: -60%;
+      background-image:
+        linear-gradient(rgba(0,200,240,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,240,0.07) 1px, transparent 1px);
+      background-size: 64px 64px;
+      transform: rotateX(55deg);
+      animation: grid-scroll 18s linear infinite;
+      mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black 20%, transparent 75%);
+    }
+    @keyframes grid-scroll {
+      0%   { background-position: 0 0; }
+      100% { background-position: 0 64px; }
+    }
+
+    /* Titre hero avec gradient lumineux */
+    .hero-title {
+      background: linear-gradient(135deg, #ffffff 0%, #c8f0ff 45%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 40px rgba(0,200,240,0.25));
+    }
+
+    /* Nav glassmorphism */
+    nav {
+      backdrop-filter: blur(20px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+      background: rgba(6,9,15,0.75) !important;
+      border-bottom: 1px solid rgba(0,200,240,0.07) !important;
+    }
+
+    /* Section titles gradient */
+    .section-title {
+      background: linear-gradient(135deg, #ffffff 0%, #d4f0ff 55%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* CTA button glow */
+    .btn-primary {
+      box-shadow: 0 0 20px rgba(0,200,240,0.35), 0 0 50px rgba(0,200,240,0.12);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 35px rgba(0,200,240,0.55), 0 0 70px rgba(0,200,240,0.2) !important;
+    }
+
+    /* Project cards — glassmorphism + 3D tilt (géré par JS) */
+    .project-card {
+      background: rgba(9,13,21,0.65) !important;
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(0,200,240,0.1) !important;
+      will-change: transform;
+      transform-style: preserve-3d;
+      transition: border-color 0.4s, box-shadow 0.4s !important;
+    }
+    .project-card:hover {
+      border-color: rgba(0,200,240,0.28) !important;
+      box-shadow:
+        0 30px 70px rgba(0,0,0,0.65),
+        0 0 0 1px rgba(0,200,240,0.12),
+        0 0 50px rgba(0,200,240,0.07) !important;
+      transform: none !important; /* overridden by JS mousemove */
+    }
+
+    /* Shimmer holographique au hover */
+    .project-card::before {
+      content: '';
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(
+        130deg,
+        transparent 0%,
+        rgba(0,200,240,0.04) 35%,
+        rgba(124,58,237,0.04) 65%,
+        transparent 100%
+      );
+      opacity: 0; transition: opacity 0.5s; pointer-events: none;
+    }
+    .project-card:hover::before { opacity: 1; }
+
+    /* Coins lumineux sur les cards */
+    .card-corner-tr, .card-corner-bl {
+      position: absolute; width: 18px; height: 18px;
+      opacity: 0; transition: opacity 0.4s; pointer-events: none; z-index: 2;
+    }
+    .card-corner-tr {
+      top: 0; right: 0;
+      border-top: 1.5px solid var(--accent);
+      border-right: 1.5px solid var(--accent);
+    }
+    .card-corner-bl {
+      bottom: 0; left: 0;
+      border-bottom: 1.5px solid var(--accent2);
+      border-left: 1.5px solid var(--accent2);
+    }
+    .project-card:hover .card-corner-tr,
+    .project-card:hover .card-corner-bl { opacity: 0.8; }
+
+    /* Skill categories — glass + lift */
+    .skill-category {
+      background: rgba(9,14,22,0.55) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .skill-category:hover {
+      transform: translateY(-5px) scale(1.005) !important;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 25px rgba(0,200,240,0.05) !important;
+    }
+
+    /* Skill bars avec point lumineux en bout */
+    .skill-bar {
+      box-shadow: 0 0 8px rgba(0,200,240,0.3);
+      position: relative; overflow: visible;
+    }
+    .skill-bar::after {
+      content: '';
+      position: absolute; right: -1px; top: 50%;
+      transform: translateY(-50%);
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent), 0 0 14px var(--accent);
+    }
+
+    /* Timeline dots pulse */
+    .timeline-dot {
+      animation: dot-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes dot-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,200,240,0.5); }
+      50%      { box-shadow: 0 0 0 7px rgba(0,200,240,0); }
+    }
+
+    /* Contact cards glow */
+    .contact-card:hover {
+      box-shadow: 0 0 30px rgba(0,200,240,0.15) !important;
+    }
+
+    /* ---- Hero orbs — plus intenses ---- */
+    .orb-1 {
+      background: radial-gradient(circle, rgba(0,200,240,0.22) 0%, transparent 70%);
+      width: 600px; height: 600px;
+    }
+    .orb-2 {
+      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+      width: 480px; height: 480px;
+    }
+
+    /* ---- Fond Aurora animé ---- */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 110%, rgba(0,200,240,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 80% -10%, rgba(124,58,237,0.07) 0%, transparent 55%);
+      pointer-events: none; z-index: 0;
+      animation: aurora-shift 20s ease-in-out infinite alternate;
+    }
+    @keyframes aurora-shift {
+      0%   { opacity: 0.7; transform: scale(1) translate(0,0); }
+      50%  { opacity: 1;   transform: scale(1.08) translate(2%,-2%); }
+      100% { opacity: 0.8; transform: scale(1) translate(-2%,2%); }
+    }
+
+    /* ---- Hero badge pulsing border ---- */
+    .hero-badge {
+      animation: badge-pulse 3s ease-in-out infinite;
+    }
+    @keyframes badge-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,200,240,0); }
+      50%      { box-shadow: 0 0 0 4px rgba(0,200,240,0.12); }
+    }
+
+    /* ---- Hero stats 3D lift ---- */
+    .stat {
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+    }
+    .stat:hover {
+      transform: perspective(400px) translateZ(14px) translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,200,240,0.12);
+    }
+
+    /* ---- Skill bar track glow ---- */
+    .skill-bar-track {
+      background: rgba(0,200,240,0.04);
+      box-shadow: inset 0 0 8px rgba(0,200,240,0.04);
+    }
+
+    /* ---- Nav links hover glow ---- */
+    .nav-links a:hover {
+      color: var(--accent) !important;
+      text-shadow: 0 0 12px rgba(0,200,240,0.5);
+    }
+
+    /* ---- Section title underline animation ---- */
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      margin-top: 6px;
+      border-radius: 2px;
+      box-shadow: 0 0 10px var(--accent);
+      transition: width 1s cubic-bezier(0.16,1,0.3,1);
+    }
+    .section-title.visible::after { width: 80px; }
+
+    /* ---- Skill category inner glow on hover ---- */
+    .skill-category:hover {
+      background: rgba(0,200,240,0.03) !important;
+      border-color: rgba(0,200,240,0.18) !important;
+    }
+
   </style>
 </head>
 <body>
@@ -832,6 +1079,7 @@
   <section id="hero">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
+    <div class="hero-grid-3d"><div class="hero-grid-3d-inner"></div></div>
 
     <div class="hero-content">
       <div class="hero-badge">
@@ -1976,6 +2224,339 @@ Disponible en alternance à partir de septembre 2026`;
         input.focus();
       }
     }
+  </script>
+
+  <script>
+  /* ============================================================
+     ★ FUTURISTE LEVEL 2 — Full 3D Experience
+  ============================================================ */
+
+  /* ---------- 1. 3D Card Tilt + Corner Accents ---------- */
+  document.querySelectorAll('.project-card').forEach(card => {
+    ['card-corner-tr','card-corner-bl'].forEach(cls => {
+      const el = document.createElement('div');
+      el.className = cls; card.appendChild(el);
+    });
+    card.addEventListener('mousemove', e => {
+      const r  = card.getBoundingClientRect();
+      const x  = e.clientX - r.left, y = e.clientY - r.top;
+      const cx = r.width/2, cy = r.height/2;
+      const rotY = ((x-cx)/cx)*12, rotX = -((y-cy)/cy)*8;
+      card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(10px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform 0.7s cubic-bezier(0.23,1,0.32,1), border-color 0.4s, box-shadow 0.4s';
+      card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+      setTimeout(() => { card.style.transition = ''; }, 720);
+    });
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = 'transform 0.08s ease-out, border-color 0.4s, box-shadow 0.4s';
+    });
+  });
+
+  /* ---------- 2. Canvas Particle Field ---------- */
+  (function() {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'particle-canvas';
+    Object.assign(canvas.style, {
+      position:'fixed', top:'0', left:'0', width:'100%', height:'100%',
+      pointerEvents:'none', zIndex:'0', opacity:'0.55'
+    });
+    document.body.prepend(canvas);
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [], mouseX = W/2, mouseY = H/2;
+
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+    class Particle {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = Math.random() * W; this.y = Math.random() * H;
+        this.vx = (Math.random()-0.5)*0.35; this.vy = (Math.random()-0.5)*0.35;
+        this.r = Math.random()*1.4+0.3;
+        this.alpha = Math.random()*0.6+0.15;
+        this.color = Math.random() > 0.7 ? '124,58,237' : '0,200,240';
+      }
+      update() {
+        const dx = mouseX - this.x, dy = mouseY - this.y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < 160) {
+          this.vx -= (dx/dist)*0.03; this.vy -= (dy/dist)*0.03;
+        }
+        this.x += this.vx; this.y += this.vy;
+        if (this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(${this.color},${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    const N = 110;
+    for (let i=0;i<N;i++) particles.push(new Particle());
+
+    function drawConnections() {
+      for (let i=0;i<particles.length;i++) {
+        for (let j=i+1;j<particles.length;j++) {
+          const dx = particles[i].x-particles[j].x, dy = particles[i].y-particles[j].y;
+          const d = Math.sqrt(dx*dx+dy*dy);
+          if (d<110) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0,200,240,${0.08*(1-d/110)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function loop() {
+      ctx.clearRect(0,0,W,H);
+      drawConnections();
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  /* ---------- 3. Scroll Reveal — 3D entrée des sections ---------- */
+  (function() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .reveal-3d {
+        opacity: 0;
+        transform: perspective(900px) rotateX(18deg) translateY(50px) translateZ(-60px);
+        transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1),
+                    transform 0.85s cubic-bezier(0.16,1,0.3,1);
+      }
+      .reveal-3d.visible {
+        opacity: 1;
+        transform: perspective(900px) rotateX(0deg) translateY(0px) translateZ(0px);
+      }
+      .reveal-3d-left {
+        opacity: 0;
+        transform: perspective(900px) rotateY(-20deg) translateX(-60px);
+        transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1),
+                    transform 0.75s cubic-bezier(0.16,1,0.3,1);
+      }
+      .reveal-3d-left.visible {
+        opacity: 1;
+        transform: perspective(900px) rotateY(0deg) translateX(0px);
+      }
+      .reveal-3d-right {
+        opacity: 0;
+        transform: perspective(900px) rotateY(20deg) translateX(60px);
+        transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1),
+                    transform 0.75s cubic-bezier(0.16,1,0.3,1);
+      }
+      .reveal-3d-right.visible {
+        opacity: 1;
+        transform: perspective(900px) rotateY(0deg) translateX(0px);
+      }
+    `;
+    document.head.appendChild(style);
+
+    document.querySelectorAll('.project-card').forEach((el,i) => {
+      el.classList.add(i%2===0 ? 'reveal-3d-left' : 'reveal-3d-right');
+      el.style.transitionDelay = `${i*0.08}s`;
+    });
+    document.querySelectorAll('.skill-category').forEach((el,i) => {
+      el.classList.add('reveal-3d');
+      el.style.transitionDelay = `${i*0.06}s`;
+    });
+    document.querySelectorAll('.timeline-item, .contact-card').forEach((el,i) => {
+      el.classList.add('reveal-3d');
+      el.style.transitionDelay = `${i*0.1}s`;
+    });
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.reveal-3d, .reveal-3d-left, .reveal-3d-right').forEach(el => obs.observe(el));
+  })();
+
+  /* ---------- 4. Hero Mouse Parallax ---------- */
+  (function() {
+    const hero = document.querySelector('#hero');
+    if (!hero) return;
+    const orbs = hero.querySelectorAll('.orb');
+    const title = hero.querySelector('.hero-title');
+    const badge = hero.querySelector('.hero-badge');
+    const grid  = hero.querySelector('.hero-grid-3d-inner');
+    let tx = 0, ty = 0, curX = 0, curY = 0;
+
+    document.addEventListener('mousemove', e => {
+      tx = (e.clientX/window.innerWidth - 0.5);
+      ty = (e.clientY/window.innerHeight - 0.5);
+    });
+
+    function animParallax() {
+      curX += (tx - curX) * 0.06;
+      curY += (ty - curY) * 0.06;
+      orbs.forEach((orb, i) => {
+        const d = (i+1) * 28;
+        orb.style.transform = `translate(${curX*d}px, ${curY*d}px) scale(1)`;
+      });
+      if (title) title.style.transform = `translate(${curX*8}px, ${curY*5}px)`;
+      if (badge) badge.style.transform = `translate(${curX*5}px, ${curY*3}px)`;
+      if (grid)  grid.style.transform  = `rotateX(55deg) translate(${curX*18}px, ${curY*12}px)`;
+      requestAnimationFrame(animParallax);
+    }
+    animParallax();
+  })();
+
+  /* ---------- 5. Stat counter animation ---------- */
+  (function() {
+    const stats = document.querySelectorAll('.stat-value span');
+    if (!stats.length) return;
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const target = parseInt(el.textContent.replace(/\D/g,''));
+        if (isNaN(target) || target === 0) return;
+        let dur = 1400, t0 = null;
+        function step(ts) {
+          if (!t0) t0 = ts;
+          const p = Math.min((ts-t0)/dur, 1);
+          const ease = 1 - Math.pow(1-p, 3);
+          el.textContent = Math.round(ease * target);
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+        obs.unobserve(el);
+      });
+    }, {threshold: 0.1, rootMargin: '0px 0px 100px 0px'});
+    stats.forEach(s => obs.observe(s));
+  })();
+
+  /* ---------- 6. Scroll progress bar ---------- */
+  (function() {
+    const bar = document.createElement('div');
+    Object.assign(bar.style, {
+      position: 'fixed', top: '0', left: '0', height: '2px',
+      background: 'linear-gradient(90deg, #00c8f0, #7c3aed)',
+      zIndex: '99999', width: '0%', transition: 'width 0.1s linear',
+      boxShadow: '0 0 12px rgba(0,200,240,0.8)'
+    });
+    document.body.appendChild(bar);
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+      bar.style.width = Math.min(pct, 100) + '%';
+    });
+  })();
+
+  /* ---------- 7. Magnetic buttons ---------- */
+  document.querySelectorAll('.btn-primary').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width/2)) * 0.28;
+      const dy = (e.clientY - (r.top  + r.height/2)) * 0.28;
+      btn.style.transform = `translate(${dx}px, ${dy}px) scale(1.04)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
+      btn.style.transform = 'translate(0,0) scale(1)';
+      setTimeout(() => btn.style.transition = '', 520);
+    });
+    btn.addEventListener('mouseenter', () => {
+      btn.style.transition = 'transform 0.12s ease';
+    });
+  });
+
+  /* ---------- 7b. Section title underline reveal ---------- */
+  (function() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.section-title').forEach(t => obs.observe(t));
+  })();
+
+  /* ---------- 8. Floating 3D rings in hero ---------- */
+  (function() {
+    const hero = document.querySelector('#hero');
+    if (!hero) return;
+    const style = document.createElement('style');
+    style.textContent = `
+      .ring-3d {
+        position: absolute; border-radius: 50%; pointer-events: none;
+        border: 1px solid rgba(0,200,240,0.12);
+        animation: ring-spin 24s linear infinite;
+      }
+      .ring-3d:nth-child(1) { width:320px;height:320px;top:12%;right:8%;animation-duration:22s;border-color:rgba(0,200,240,0.10); }
+      .ring-3d:nth-child(2) { width:200px;height:200px;top:20%;right:12%;animation-duration:16s;animation-direction:reverse;border-color:rgba(124,58,237,0.12); }
+      .ring-3d:nth-child(3) { width:120px;height:120px;top:30%;right:18%;animation-duration:10s;border-color:rgba(0,200,240,0.18); }
+      @keyframes ring-spin {
+        0%   { transform: rotateX(72deg) rotateZ(0deg); }
+        100% { transform: rotateX(72deg) rotateZ(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    for (let i=0;i<3;i++) {
+      const r = document.createElement('div');
+      r.className = 'ring-3d';
+      hero.appendChild(r);
+    }
+  })();
+
+  /* ---------- 9. Glitch effect on hero name ---------- */
+  (function() {
+    const name = document.querySelector('.hero-title .name');
+    if (!name) return;
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes glitch-1 {
+        0%,95%,100% { clip-path: none; transform: none; }
+        96% { clip-path: polygon(0 20%,100% 20%,100% 40%,0 40%); transform: translate(-3px,1px); }
+        97% { clip-path: polygon(0 60%,100% 60%,100% 75%,0 75%); transform: translate(3px,-1px); }
+        98% { clip-path: polygon(0 40%,100% 40%,100% 60%,0 60%); transform: translate(-2px,2px); }
+        99% { clip-path: none; transform: translate(2px,-1px); }
+      }
+      .hero-title .name {
+        display: inline-block;
+        animation: glitch-1 7s steps(1) infinite;
+      }
+    `;
+    document.head.appendChild(style);
+  })();
+
+  /* ---------- 10. Skill bar animated width on scroll ---------- */
+  (function() {
+    const bars = document.querySelectorAll('.skill-bar');
+    if (!bars.length) return;
+    bars.forEach(bar => {
+      const target = bar.style.width || bar.getAttribute('style')?.match(/width:\s*([\d.]+%)/)?.[1];
+      if (!target) return;
+      bar.dataset.target = target;
+      bar.style.width = '0%';
+      bar.style.transition = 'none';
+    });
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const bar = e.target;
+        setTimeout(() => {
+          bar.style.transition = 'width 1.2s cubic-bezier(0.16,1,0.3,1)';
+          bar.style.width = bar.dataset.target || '0%';
+        }, 100);
+        obs.unobserve(bar);
+      });
+    }, { threshold: 0.1 });
+    bars.forEach(b => obs.observe(b));
+  })();
+
   </script>
 </body>
 </html>
