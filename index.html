@@ -1644,11 +1644,7 @@
       </div>
     </div>
 
-    <div id="chat-suggestions">
-      <button class="chat-suggestion">Quelle compétence tu maîtrises le mieux ?</button>
-      <button class="chat-suggestion">Quels outils tu utilises ?</button>
-      <button class="chat-suggestion">Tu cherches quoi comme alternance ?</button>
-    </div>
+    <div id="chat-suggestions"></div>
 
     <div id="chat-input-area">
       <input type="text" id="chat-input" placeholder="Posez une question..." maxlength="300" />
@@ -1774,19 +1770,101 @@ Portfolio : judebkn-star.github.io/portfolio
 Disponible en alternance à partir de septembre 2026`;
 
     // ===================== CHATBOT LOGIC =====================
-    const panel       = document.getElementById('chat-panel');
-    const toggleBtn   = document.getElementById('chat-toggle');
-    const closeBtn    = document.getElementById('chat-close');
-    const messages    = document.getElementById('chat-messages');
-    const input       = document.getElementById('chat-input');
-    const sendBtn     = document.getElementById('chat-send');
-    const suggestions = document.querySelectorAll('.chat-suggestion');
-    const iconOpen    = document.getElementById('chat-icon-open');
-    const iconClose   = document.getElementById('chat-icon-close');
+    const panel     = document.getElementById('chat-panel');
+    const toggleBtn = document.getElementById('chat-toggle');
+    const closeBtn  = document.getElementById('chat-close');
+    const messages  = document.getElementById('chat-messages');
+    const input     = document.getElementById('chat-input');
+    const sendBtn   = document.getElementById('chat-send');
+    const iconOpen  = document.getElementById('chat-icon-open');
+    const iconClose = document.getElementById('chat-icon-close');
 
     let isOpen = false;
     let isLoading = false;
+    let currentCtx = 'initial';
     const history = [];
+
+    /* ============================================================
+       CHIP SETS — conversation guidée
+       label  : texte affiché sur le chip
+       msg    : message envoyé au bot (optionnel si url)
+       url    : ouvre un projet dans un nouvel onglet
+       ctx    : prochain chip set à afficher
+    ============================================================ */
+    const CHIP_SETS = {
+      initial: [
+        { label: "Quelle compétence tu maîtrises le mieux ?", msg: "Quelle compétence tu maîtrises le mieux ?", ctx: "competence" },
+        { label: "Quels outils tu utilises ?",                msg: "Quels outils tu utilises ?",                ctx: "outils" },
+        { label: "Tu cherches quoi comme alternance ?",       msg: "Tu cherches quoi comme alternance ?",       ctx: "alternance" }
+      ],
+      competence: [
+        { label: "📊 Voir les dashboards F1",       url: "f1.html" },
+        { label: "Et côté Salesforce ?",            msg: "Comment tu utilises Salesforce au quotidien ?",              ctx: "salesforce" },
+        { label: "Tes réalisations concrètes ?",    msg: "Quelles sont tes réalisations concrètes chez Les Parents Zens ?", ctx: "realisations" }
+      ],
+      outils: [
+        { label: "C'est quoi l'agent SDR ?",        msg: "C'est quoi exactement l'agent SDR Salesforce que tu as déployé ?", ctx: "agent_sdr" },
+        { label: "🎵 Voir le projet Discogs",        url: "discogs.html" },
+        { label: "Tu maîtrises quoi en IA ?",       msg: "Tu maîtrises quoi comme outils IA ?",                      ctx: "ia" }
+      ],
+      alternance: [
+        { label: "Tes réalisations concrètes ?",    msg: "Quelles sont tes réalisations concrètes ?",                 ctx: "realisations" },
+        { label: "Quels outils tu maîtrises ?",     msg: "Quels outils tu maîtrises ?",                               ctx: "outils" },
+        { label: "🚀 Voir tous les projets",         url: "index.html#projects" }
+      ],
+      salesforce: [
+        { label: "Il fait quoi concrètement ?",     msg: "Explique-moi concrètement ce que tu fais sur Salesforce",   ctx: "salesforce_detail" },
+        { label: "🏎️ Voir le projet F1 (SQL/data)", url: "f1.html" },
+        { label: "Tu cherches quoi comme alternance ?", msg: "Tu cherches quoi comme alternance ?",                   ctx: "alternance" }
+      ],
+      salesforce_detail: [
+        { label: "Le forecast, ça donne quoi ?",    msg: "Comment tu construis les modèles de forecast commerciaux ?", ctx: "realisations" },
+        { label: "⚡ Voir le hackathon PayFit",      url: "payfit-hackathon.html" },
+        { label: "Et les autres outils ?",          msg: "Quels autres outils tu utilises en dehors de Salesforce ?", ctx: "outils" }
+      ],
+      agent_sdr: [
+        { label: "⚡ Voir le hackathon PayFit (IA)", url: "payfit-hackathon.html" },
+        { label: "D'autres automatisations ?",      msg: "Tu as d'autres automatisations en production ?",            ctx: "automatisation" },
+        { label: "Et les dashboards ?",             msg: "Quelle compétence tu maîtrises le mieux ?",                ctx: "competence" }
+      ],
+      ia: [
+        { label: "C'est quoi l'agent SDR ?",        msg: "C'est quoi l'agent SDR connecté à Salesforce ?",           ctx: "agent_sdr" },
+        { label: "⚡ Hackathon PayFit multi-agents", url: "payfit-hackathon.html" },
+        { label: "Et les dashboards ?",             msg: "Quelle compétence tu maîtrises le mieux ?",                ctx: "competence" }
+      ],
+      realisations: [
+        { label: "🏎️ Projet F1 (Tableau/SQL)",      url: "f1.html" },
+        { label: "🎵 Projet Discogs (scraping)",     url: "discogs.html" },
+        { label: "Tu cherches quoi comme alternance ?", msg: "Tu cherches quoi comme alternance ?",                   ctx: "alternance" }
+      ],
+      automatisation: [
+        { label: "⚡ Voir le hackathon PayFit",      url: "payfit-hackathon.html" },
+        { label: "Et Salesforce dans tout ça ?",    msg: "Comment l'automatisation s'intègre avec Salesforce ?",     ctx: "salesforce" },
+        { label: "Tu cherches quoi comme alternance ?", msg: "Tu cherches quoi comme alternance ?",                   ctx: "alternance" }
+      ]
+    };
+
+    function renderChips(ctx) {
+      const container = document.getElementById('chat-suggestions');
+      const set = CHIP_SETS[ctx] || CHIP_SETS.initial;
+      container.innerHTML = '';
+      container.style.display = 'flex';
+      set.forEach(chip => {
+        const btn = document.createElement('button');
+        btn.className = 'chat-suggestion';
+        btn.textContent = chip.label;
+        if (chip.url) {
+          btn.addEventListener('click', () => window.open(chip.url, '_blank'));
+        } else {
+          btn.addEventListener('click', () => {
+            currentCtx = chip.ctx || 'initial';
+            input.value = chip.msg;
+            sendMessage();
+          });
+        }
+        container.appendChild(btn);
+      });
+    }
 
     function toggleChat() {
       isOpen = !isOpen;
@@ -1799,17 +1877,13 @@ Disponible en alternance à partir de septembre 2026`;
     toggleBtn.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
 
-    suggestions.forEach(btn => {
-      btn.addEventListener('click', () => {
-        input.value = btn.textContent;
-        sendMessage();
-      });
-    });
-
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     });
     sendBtn.addEventListener('click', sendMessage);
+
+    // Init chips
+    renderChips('initial');
 
     function addMessage(role, text) {
       const wrapper = document.createElement('div');
@@ -1844,7 +1918,7 @@ Disponible en alternance à partir de septembre 2026`;
       const text = input.value.trim();
       if (!text || isLoading) return;
 
-      // Hide suggestions after first message
+      // Masquer les chips pendant que le bot répond
       document.getElementById('chat-suggestions').style.display = 'none';
 
       input.value = '';
@@ -1889,9 +1963,13 @@ Disponible en alternance à partir de septembre 2026`;
         addMessage('bot', reply);
         history.push({ role: 'assistant', content: reply });
 
+        // Afficher les chips contextuels après la réponse
+        renderChips(currentCtx);
+
       } catch (e) {
         removeTyping();
         addMessage('bot', 'Erreur de connexion. Vérifiez votre connexion internet.');
+        renderChips(currentCtx);
       } finally {
         isLoading = false;
         sendBtn.disabled = false;
