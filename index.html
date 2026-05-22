@@ -2125,10 +2125,10 @@ Disponible en alternance à partir de septembre 2026`;
     toggleBtn.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', toggleChat);
 
-    // Auto-open après 5 secondes
+    // Auto-open après 3 secondes
     setTimeout(() => {
       if (!isOpen) toggleChat();
-    }, 5000);
+    }, 3000);
 
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
