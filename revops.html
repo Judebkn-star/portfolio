@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RevOps Pipeline Analytics — Jude Buyikana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #06090f;
+      --bg2:     #0a0e17;
+      --bg3:     #0f1620;
+      --card:    #111a27;
+      --border:  #1a2840;
+      --blue:    #1e6fcc;
+      --blue2:   #3b9eff;
+      --accent:  #00c8f0;
+      --accent2: #7c3aed;
+      --teal:    #0ea5c0;
+      --green:   #3b6d11;
+      --red:     #e24b4a;
+      --beige:   #f5f0e8;
+      --text:    #e6edf3;
+      --text2:   #8b949e;
+      --text3:   #4d5f70;
+      --font:    'Inter', sans-serif;
+      --font2:   'Space Grotesk', sans-serif;
+      --font-mono: 'Space Grotesk', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ====== NAV ====== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 5%; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(6,9,15,0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: var(--font2); font-size: 1.05rem; font-weight: 700; }
+    .nav-logo span { color: var(--accent); }
+    .nav-back {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; color: var(--text2); transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back svg { opacity: 0.6; }
+
+    /* ====== HERO ====== */
+    #hero {
+      min-height: 56vh; display: flex; align-items: flex-end;
+      padding: 100px 5% 64px; position: relative; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 10% 80%, rgba(30,111,204,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 20%, rgba(0,200,240,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 50% 110%, rgba(124,58,237,0.07) 0%, transparent 60%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,200,240,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,240,0.04) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 100%, black 20%, transparent 75%);
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 820px; }
+
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.8rem; color: var(--text3); margin-bottom: 20px;
+      font-family: var(--font-mono); letter-spacing: 0.03em;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb .sep { opacity: 0.4; }
+
+    .project-type {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue2);
+      padding: 6px 14px; border: 1px solid rgba(30,111,204,0.3);
+      border-radius: 100px; background: rgba(30,111,204,0.06);
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-family: var(--font2); font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #fff 0%, #cce8ff 50%, var(--blue2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem; color: var(--text2); max-width: 620px;
+      line-height: 1.75; margin-bottom: 36px;
+    }
+    .hero-desc strong { color: var(--text); }
+
+    .hero-meta {
+      display: flex; flex-wrap: wrap; gap: 12px;
+    }
+    .meta-item {
+      display: flex; flex-direction: column; gap: 3px;
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px; min-width: 110px;
+    }
+    .meta-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); }
+    .meta-value { font-size: 0.9rem; font-weight: 600; color: var(--text); font-family: var(--font2); }
+
+    /* ====== KPI STRIP ====== */
+    #kpi-strip {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 0;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      divide-x: 1px solid var(--border);
+    }
+    .kpi-card {
+      padding: 28px 24px;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .kpi-card:last-child { border-right: none; }
+    .kpi-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--text3); margin-bottom: 8px; font-family: var(--font-mono);
+    }
+    .kpi-value {
+      font-family: var(--font2); font-size: 1.65rem; font-weight: 700;
+      color: var(--text); line-height: 1;
+    }
+    .kpi-value.blue { color: var(--blue2); }
+    .kpi-value.teal { color: var(--accent); }
+    .kpi-value.green { color: #4ade80; }
+    .kpi-sub { font-size: 0.72rem; color: var(--text3); margin-top: 5px; }
+
+    /* ====== SECTIONS ====== */
+    section { padding: 80px 5%; border-bottom: 1px solid var(--border); }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--blue2);
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: var(--font2); font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em;
+    }
+    .section-desc {
+      color: var(--text2); font-size: 1rem; max-width: 640px;
+      line-height: 1.75; margin-bottom: 48px;
+    }
+
+    /* ====== FADE IN ====== */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    /* ====== DASHBOARDS ====== */
+    .dashboard-list { display: flex; flex-direction: column; gap: 64px; }
+
+    .dashboard-item { }
+    .dashboard-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 12px;
+    }
+    .dashboard-num {
+      font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em;
+      color: var(--text3); text-transform: uppercase; margin-bottom: 4px;
+    }
+    .dashboard-title {
+      font-family: var(--font2); font-size: 1.25rem; font-weight: 600;
+      color: var(--text);
+    }
+    .dashboard-audience {
+      font-size: 0.75rem; padding: 5px 12px;
+      background: rgba(30,111,204,0.08);
+      border: 1px solid rgba(30,111,204,0.2);
+      border-radius: 100px; color: var(--blue2); white-space: nowrap;
+    }
+    .dashboard-desc { color: var(--text2); font-size: 0.95rem; line-height: 1.7; margin-bottom: 24px; max-width: 780px; }
+
+    .dashboard-img-wrap {
+      border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer; transition: border-color 0.3s, box-shadow 0.3s;
+      background: var(--bg2);
+    }
+    .dashboard-img-wrap:hover {
+      border-color: rgba(30,111,204,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(30,111,204,0.08);
+    }
+    .dashboard-img-wrap img { width: 100%; display: block; }
+
+    /* Dashboard placeholder (when screenshot not available) */
+    .dashboard-placeholder {
+      border-radius: 12px;
+      border: 1px dashed rgba(30,111,204,0.3);
+      background: rgba(30,111,204,0.03);
+      padding: 80px 40px;
+      text-align: center;
+      min-height: 340px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    }
+    .placeholder-icon { font-size: 2.5rem; opacity: 0.4; }
+    .placeholder-title { font-family: var(--font2); font-size: 1rem; font-weight: 600; color: var(--text2); }
+    .placeholder-sub { font-size: 0.85rem; color: var(--text3); max-width: 360px; }
+    .placeholder-kpis {
+      display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+      margin-top: 20px;
+    }
+    .placeholder-kpi {
+      padding: 14px 20px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 10px; text-align: center;
+    }
+    .placeholder-kpi-v { font-family: var(--font2); font-size: 1.3rem; font-weight: 700; color: var(--blue2); }
+    .placeholder-kpi-l { font-size: 0.68rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; }
+
+    /* Dashboard vizs list */
+    .viz-list {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px; margin-top: 20px;
+    }
+    .viz-item {
+      padding: 14px 16px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .viz-type { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 5px; font-family: var(--font-mono); }
+    .viz-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+    .viz-insight { font-size: 0.78rem; color: var(--blue2); margin-top: 4px; font-style: italic; }
+
+    /* ====== INSIGHTS ====== */
+    .insights-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;
+    }
+    .insight-card {
+      padding: 24px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border); border-radius: 12px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .insight-card:hover { border-color: rgba(30,111,204,0.3); transform: translateY(-3px); }
+    .insight-icon { font-size: 1.4rem; margin-bottom: 12px; }
+    .insight-title { font-family: var(--font2); font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+    .insight-text { font-size: 0.88rem; color: var(--text2); line-height: 1.65; }
+    .insight-number { font-family: var(--font2); font-size: 1.4rem; font-weight: 700; color: var(--blue2); margin-bottom: 4px; }
+
+    /* ====== STACK ====== */
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;
+    }
+    .stack-card {
+      padding: 24px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border); border-radius: 12px;
+      transition: border-color 0.3s;
+    }
+    .stack-card:hover { border-color: rgba(30,111,204,0.35); }
+    .stack-icon { font-size: 1.6rem; margin-bottom: 12px; }
+    .stack-name { font-family: var(--font2); font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .stack-role { font-size: 0.78rem; color: var(--blue2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; font-family: var(--font-mono); }
+    .stack-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+
+    /* ====== LOD BLOCK ====== */
+    .lod-block {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 32px; margin-top: 32px;
+    }
+    .lod-title { font-family: var(--font2); font-size: 1rem; font-weight: 600; margin-bottom: 20px; color: var(--accent); }
+    .lod-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .lod-item {
+      background: rgba(0,0,0,0.3); border-radius: 8px; padding: 16px;
+      border-left: 2px solid var(--blue2);
+    }
+    .lod-name { font-size: 0.78rem; color: var(--blue2); font-family: var(--font-mono); margin-bottom: 6px; }
+    .lod-code { font-family: 'Courier New', monospace; font-size: 0.78rem; color: #9ecfff; line-height: 1.5; white-space: pre-wrap; }
+
+    /* ====== SKILLS ====== */
+    .skills-block {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 12px;
+    }
+    .skill-pill {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.84rem; color: var(--text2);
+    }
+    .skill-pill::before { content: '✓'; color: var(--blue2); font-weight: 700; font-size: 0.8rem; }
+
+    /* ====== CONTEXT ====== */
+    .context-block {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+    }
+    .context-text { color: var(--text2); font-size: 0.95rem; line-height: 1.8; }
+    .context-text strong { color: var(--text); }
+    .context-text p { margin-bottom: 16px; }
+    .context-links { display: flex; flex-direction: column; gap: 12px; }
+    .context-link {
+      display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 10px; font-size: 0.88rem; color: var(--text2);
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .context-link:hover { border-color: rgba(30,111,204,0.4); color: var(--text); }
+    .context-link-icon { font-size: 1.2rem; }
+    .context-link-label { font-weight: 500; }
+    .context-link-sub { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+
+    /* ====== LIGHTBOX ====== */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 95vw; max-height: 93vh; border-radius: 8px; cursor: default; }
+    .lightbox-close {
+      position: absolute; top: 20px; right: 28px; font-size: 1.5rem;
+      color: var(--text2); cursor: pointer; transition: color 0.2s;
+      line-height: 1;
+    }
+    .lightbox-close:hover { color: var(--text); }
+
+    /* ====== CTA ====== */
+    #cta {
+      text-align: center; padding: 80px 5%; background: var(--bg2); border-bottom: none;
+    }
+    .cta-title { font-family: var(--font2); font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+    .cta-sub { color: var(--text2); margin-bottom: 32px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; background: var(--blue); color: #fff;
+      border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover { background: var(--blue2); box-shadow: 0 0 30px rgba(30,111,204,0.4); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 24px; border: 1px solid var(--border); color: var(--text2);
+      border-radius: 10px; font-weight: 500; font-size: 0.95rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(30,111,204,0.4); color: var(--text); }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+      .context-block { grid-template-columns: 1fr; }
+      .kpi-card { padding: 20px 16px; }
+      .kpi-value { font-size: 1.3rem; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ====== NAV ====== -->
+  <nav>
+    <div class="nav-logo">JB<span>.</span></div>
+    <a href="index.html" class="nav-back">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Retour au portfolio
+    </a>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="breadcrumb">
+        <a href="index.html">Portfolio</a>
+        <span class="sep">/</span>
+        <span>RevOps Pipeline Analytics</span>
+      </div>
+      <div class="project-type">📊 Revenue Operations · Tableau · Google Sheets</div>
+      <h1 class="hero-title">RevOps Pipeline Analytics<br/>— Du dataset brut au dashboard exécutif</h1>
+      <p class="hero-desc">
+        Démonstration <strong>end-to-end</strong> d'une chaîne analytique Revenue Operations complète :
+        dataset synthétique Salesforce-like (5 000 deals · 21 colonnes · 24 mois),
+        exploration Google Sheets, puis 3 dashboards Tableau de <strong>qualité exécutive</strong>.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Type</span>
+          <span class="meta-value">Projet portfolio</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Données</span>
+          <span class="meta-value">5 000 deals</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Stack</span>
+          <span class="meta-value">Tableau · Sheets</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Période</span>
+          <span class="meta-value">24 mois simulés</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Colonnes</span>
+          <span class="meta-value">21 champs</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== KPI STRIP ====== -->
+  <div id="kpi-strip">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Active Deals</div>
+        <div class="kpi-value">5 000</div>
+        <div class="kpi-sub">24 mois d'activité</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Pipeline</div>
+        <div class="kpi-value blue">$2.34B</div>
+        <div class="kpi-sub">en jeu</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Expected Revenue</div>
+        <div class="kpi-value teal">$751M</div>
+        <div class="kpi-sub">pondéré probabilité</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Win Rate</div>
+        <div class="kpi-value green">64.83%</div>
+        <div class="kpi-sub">global</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Closed Won</div>
+        <div class="kpi-value">494</div>
+        <div class="kpi-sub">deals signés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Cycle</div>
+        <div class="kpi-value">105j</div>
+        <div class="kpi-sub">durée pipeline</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== DASHBOARDS ====== -->
+  <section id="dashboards">
+    <div class="container">
+      <div class="section-label fade-in">Visualisations</div>
+      <h2 class="section-title fade-in">3 Dashboards Tableau</h2>
+      <p class="section-desc fade-in">
+        Design system cohérent inspiré des standards SaaS (Salesforce, Snowflake, Stripe) —
+        fond beige, palette bleue séquentielle, typographie hiérarchisée « insight first ».
+      </p>
+
+      <div class="dashboard-list">
+
+        <!-- Dashboard 1 — Executive Overview -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-header">
+            <div>
+              <div class="dashboard-num">Dashboard 01</div>
+              <div class="dashboard-title">Revenue Operations — Executive Overview</div>
+            </div>
+            <span class="dashboard-audience">CRO · COO · Comité de direction</span>
+          </div>
+          <p class="dashboard-desc">
+            Vue d'ensemble du pipeline commercial : $2.3B en jeu avec la majorité encore à convertir.
+            Funnel qui rétrécit avant le closing, Win Rate par industrie (SaaS 71% en tête),
+            exposition concurrentielle — 75% des deals face à au moins un concurrent.
+          </p>
+          <div class="viz-list">
+            <div class="viz-item">
+              <div class="viz-type">Bar chart vertical</div>
+              <div class="viz-name">Pipeline par Stage</div>
+              <div class="viz-insight">$2.3B in play — most yet to convert</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Bar chart horizontal</div>
+              <div class="viz-name">Funnel deals actifs</div>
+              <div class="viz-insight">The pipeline stalls before closing</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Bar chart trié</div>
+              <div class="viz-name">Win Rate par Industry</div>
+              <div class="viz-insight">SaaS 71% · Insurance 59%</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Donut dual axis</div>
+              <div class="viz-name">Exposition concurrentielle</div>
+              <div class="viz-insight">Only 1 in 4 deals faces no competition</div>
+            </div>
+          </div>
+          <div style="margin-top: 20px;">
+            <div class="dashboard-placeholder">
+              <div class="placeholder-icon">📊</div>
+              <div class="placeholder-title">Dashboard 1 — Revenue Operations Executive Overview</div>
+              <div class="placeholder-sub">Pipeline $2.34B · Win Rate 64.83% · 5 000 deals actifs · Concurrence 75%</div>
+              <div class="placeholder-kpis">
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">$2.34B</div><div class="placeholder-kpi-l">Total Pipeline</div></div>
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">64.83%</div><div class="placeholder-kpi-l">Win Rate</div></div>
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">SaaS 71%</div><div class="placeholder-kpi-l">Top Industry</div></div>
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">105j</div><div class="placeholder-kpi-l">Avg Cycle</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard 2 — Sales Rep Performance -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-header">
+            <div>
+              <div class="dashboard-num">Dashboard 02</div>
+              <div class="dashboard-title">Sales Rep Performance</div>
+            </div>
+            <span class="dashboard-audience">VP Sales · Sales Manager · RevOps Lead</span>
+          </div>
+          <p class="dashboard-desc">
+            Volume ≠ Performance : Rep 44 gère le plus gros pipeline ($60.3M) mais Rep 9 convertit 93.8% de ses deals.
+            Les 10 meilleurs reps gèrent ~23% du pipeline total. Dot plot Win Rate pour identifier les profils à dupliquer.
+          </p>
+          <div class="viz-list">
+            <div class="viz-item">
+              <div class="viz-type">Bar chart horizontal</div>
+              <div class="viz-name">Leaderboard Top 10</div>
+              <div class="viz-insight">A significant gap separates top from rest</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Stacked bar vertical</div>
+              <div class="viz-name">Open / Won / Lost par Rep</div>
+              <div class="viz-insight">Rep 44 handles the highest deal volume</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Stacked bar horizontal</div>
+              <div class="viz-name">Pipeline Produit × Stage</div>
+              <div class="viz-insight">Execution makes the difference</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Dot plot (taille = deals)</div>
+              <div class="viz-name">Win Rate par Rep</div>
+              <div class="viz-insight">Best reps: 3 out of 4 deals won</div>
+            </div>
+          </div>
+          <div class="dashboard-img-wrap fade-in" style="margin-top: 20px;" onclick="openLightbox('assets/revops-reps.png')">
+            <img src="assets/revops-reps.png" alt="Dashboard Sales Rep Performance" loading="lazy" />
+          </div>
+        </div>
+
+        <!-- Dashboard 3 — Regional & Risk -->
+        <div class="dashboard-item fade-in">
+          <div class="dashboard-header">
+            <div>
+              <div class="dashboard-num">Dashboard 03</div>
+              <div class="dashboard-title">Regional, Channel &amp; Risk Analysis</div>
+            </div>
+            <span class="dashboard-audience">RevOps Strategist · Regional VP</span>
+          </div>
+          <p class="dashboard-desc">
+            Anomalie de forecasting détectée : 197 deals en Commit alors qu'ils sont encore en Prospecting.
+            Pipeline régional équilibré ($459M–$480M), tous les canaux performent à un niveau similaire.
+            1 342 deals critiques (valeur &gt;$400k · probabilité &lt;30%) nécessitent une escalade.
+          </p>
+          <div class="viz-list">
+            <div class="viz-item">
+              <div class="viz-type">Symbol map</div>
+              <div class="viz-name">Pipeline régional</div>
+              <div class="viz-insight">Europe & Asia Pacific hold densest pipeline</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Stacked bar horizontal</div>
+              <div class="viz-name">Forecast par Stage</div>
+              <div class="viz-insight">Too many Commit stuck early in funnel</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Bar chart horizontal</div>
+              <div class="viz-name">Pipeline par Canal</div>
+              <div class="viz-insight">All channels perform at similar level</div>
+            </div>
+            <div class="viz-item">
+              <div class="viz-type">Heatmap Stage × Forecast</div>
+              <div class="viz-name">Risk Alert</div>
+              <div class="viz-insight">197+255 Commit deals trop tôt dans le funnel</div>
+            </div>
+          </div>
+          <div style="margin-top: 20px;">
+            <div class="dashboard-placeholder">
+              <div class="placeholder-icon">🗺️</div>
+              <div class="placeholder-title">Dashboard 3 — Regional, Channel & Risk Analysis</div>
+              <div class="placeholder-sub">Symbol map · Heatmap Stage×Forecast · Pipeline par Canal · 1 342 deals critiques identifiés</div>
+              <div class="placeholder-kpis">
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">$480.4M</div><div class="placeholder-kpi-l">Top Region (Europe)</div></div>
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">69.4%</div><div class="placeholder-kpi-l">Best Win Rate</div></div>
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">1 342</div><div class="placeholder-kpi-l">Critical Deals</div></div>
+                <div class="placeholder-kpi"><div class="placeholder-kpi-v">1 051</div><div class="placeholder-kpi-l">Reliable Commit</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <!-- ====== INSIGHTS ====== -->
+  <section id="insights">
+    <div class="container">
+      <div class="section-label fade-in">Ce que les données révèlent</div>
+      <h2 class="section-title fade-in">Insights business clés</h2>
+
+      <div class="insights-grid">
+        <div class="insight-card fade-in">
+          <div class="insight-number">$2.3B</div>
+          <div class="insight-title">Pipeline déséquilibré</div>
+          <div class="insight-text">75% de la valeur est concentrée en Qualification et Proposal. Les stages avancés (Negotiation) ne pèsent que $393M — la machine à closer est sous-alimentée.</div>
+        </div>
+        <div class="insight-card fade-in">
+          <div class="insight-number">93.8%</div>
+          <div class="insight-title">Volume ≠ Performance</div>
+          <div class="insight-text">Rep 44 a le plus gros pipeline ($60.3M) mais Rep 9 convertit 93.8% de ses deals avec seulement 16 opportunités. Deux playbooks à analyser et dupliquer.</div>
+        </div>
+        <div class="insight-card fade-in">
+          <div class="insight-number">75%</div>
+          <div class="insight-title">Marchés compétitifs</div>
+          <div class="insight-text">3 deals sur 4 font face à au moins un concurrent. La présence de multiples compétiteurs génère le plus de pertes (74 Closed Lost).</div>
+        </div>
+        <div class="insight-card fade-in">
+          <div class="insight-number">197</div>
+          <div class="insight-title">Anomalie Forecast détectée</div>
+          <div class="insight-text">197 deals en Commit sont encore en Prospecting, 255 en Qualification. Signal d'une mauvaise hygiène CRM ou d'une pression hiérarchique sur le forecast.</div>
+        </div>
+        <div class="insight-card fade-in">
+          <div class="insight-number">1 342</div>
+          <div class="insight-title">Deals critiques</div>
+          <div class="insight-text">1 342 opportunités à forte valeur (&gt;$400k) avec une probabilité de closing inférieure à 30%. Chaque deal représente un risque de pipeline non couvert.</div>
+        </div>
+        <div class="insight-card fade-in">
+          <div class="insight-number">~$467M</div>
+          <div class="insight-title">Couverture régionale équilibrée</div>
+          <div class="insight-text">Les 5 régions affichent des pipelines très proches ($459M–$480M), sans domination d'un marché. Tous les canaux d'acquisition performent à un niveau similaire.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== PHASE SHEETS ====== -->
+  <section id="sheets">
+    <div class="container">
+      <div class="section-label fade-in">Phase 2 — Exploration</div>
+      <h2 class="section-title fade-in">Google Sheets — Architecture analytique</h2>
+      <p class="section-desc fade-in">
+        Avant Tableau, Google Sheets a servi de couche d'exploration avec 7 onglets, des formules
+        dynamiques reférençant les 5 000 lignes sources, et plusieurs TCD.
+      </p>
+
+      <div class="stack-grid fade-in">
+        <div class="stack-card">
+          <div class="stack-icon">📋</div>
+          <div class="stack-name">Dashboard 1 — Pipeline Overview</div>
+          <div class="stack-role">SUMIF · COUNTIF · VLOOKUP</div>
+          <div class="stack-desc">KPIs globaux, pipeline par stage avec probabilité VLOOKUP depuis table Reference, At-Risk deals (Contract_Value &gt;$300k ET Probability &lt;30%).</div>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon">🌍</div>
+          <div class="stack-name">Dashboard 2 — Performance Drivers</div>
+          <div class="stack-role">SUMIFS · AVERAGEIF · Color Scales</div>
+          <div class="stack-desc">Pipeline par Région × Industry × Canal. Heatmap Region × Industry avec color scale gradient pour identifier les combinaisons les plus génératrices.</div>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon">👤</div>
+          <div class="stack-name">Dashboard 3 — Reps & Forecast</div>
+          <div class="stack-role">TCD · Win Rate ratio · IFERROR</div>
+          <div class="stack-desc">Top 10 commerciaux, Win Rate calculé en colonne adjacente au TCD (ratio non natif), Forecast Accuracy par catégorie, impact concurrence sur les pertes.</div>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon">⚙️</div>
+          <div class="stack-name">Architecture multi-onglets</div>
+          <div class="stack-role">Table Reference · Raw Data immuable</div>
+          <div class="stack-desc">Onglet Raw Data jamais modifié, table Reference centralisée pour les VLOOKUP, recalcul automatique de toutes les analyses à chaque modification source.</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 28px; display: flex; gap: 14px; flex-wrap: wrap;">
+        <a href="https://docs.google.com/spreadsheets/d/1PQcq9xID5rw0S-LPdm3NxQKNnfJkw3stU0gqV8S8Yis/edit?gid=1471056697#gid=1471056697" target="_blank" class="btn-primary">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+          Voir le Google Sheets
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== TABLEAU STACK ====== -->
+  <section id="tableau">
+    <div class="container">
+      <div class="section-label fade-in">Phase 3 — Tableau</div>
+      <h2 class="section-title fade-in">Calculated Fields &amp; LOD Expressions</h2>
+      <p class="section-desc fade-in">
+        Au-delà des visualisations, les calculs métier développés dans Tableau attestent
+        d'un usage avancé — notamment les <strong style="color:var(--accent)">LOD expressions imbriquées</strong>
+        (<code style="color:var(--blue2)">FIXED dans FIXED</code>), signature d'une maîtrise avancée de l'outil.
+      </p>
+
+      <div class="lod-block fade-in">
+        <div class="lod-title">⚡ Calculated Fields clés</div>
+        <div class="lod-grid">
+          <div class="lod-item">
+            <div class="lod-name">[Win Rate]</div>
+            <div class="lod-code">SUM(IF [Stage]="Closed Won" THEN 1 ELSE 0 END)
+/ (SUM(IF [Stage]="Closed Won" THEN 1 ELSE 0 END)
+ + SUM(IF [Stage]="Closed Lost" THEN 1 ELSE 0 END))</div>
+          </div>
+          <div class="lod-item">
+            <div class="lod-name">[Best Win Rate] — LOD imbriqué</div>
+            <div class="lod-code">{FIXED : MAX(
+  {FIXED [Sales Rep Name] : [Win Rate]}
+)}</div>
+          </div>
+          <div class="lod-item">
+            <div class="lod-name">[Deals Critiques] — filtre métier</div>
+            <div class="lod-code">SUM(IF [Contract Value] > 400000
+    AND [Probability] <= 30
+    AND [Status] = "Open"
+    THEN 1 ELSE 0 END)</div>
+          </div>
+          <div class="lod-item">
+            <div class="lod-name">[Top Rep Pipeline] — LOD imbriqué</div>
+            <div class="lod-code">{FIXED : MAX(
+  {FIXED [Sales Rep Name] : SUM([Contract Value])}
+)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== STACK ====== -->
+  <section id="stack">
+    <div class="container">
+      <div class="section-label fade-in">Technologies utilisées</div>
+      <h2 class="section-title fade-in">Stack technique</h2>
+
+      <div class="stack-grid">
+        <div class="stack-card fade-in">
+          <div class="stack-icon">📊</div>
+          <div class="stack-name">Tableau Public</div>
+          <div class="stack-role">Dashboards finaux</div>
+          <div class="stack-desc">3 dashboards de qualité exécutive. Calculated fields, LOD expressions imbriquées, dual axis, alias géographiques, design system cohérent.</div>
+        </div>
+        <div class="stack-card fade-in">
+          <div class="stack-icon">📗</div>
+          <div class="stack-name">Google Sheets</div>
+          <div class="stack-role">Exploration & analyses</div>
+          <div class="stack-desc">SUMIFS, COUNTIFS, AVERAGEIFS, VLOOKUP, IFERROR. Tableaux croisés dynamiques, mise en forme conditionnelle (heatmaps), architecture multi-onglets.</div>
+        </div>
+        <div class="stack-card fade-in">
+          <div class="stack-icon">☁️</div>
+          <div class="stack-name">Salesforce (référence)</div>
+          <div class="stack-role">Modélisation source</div>
+          <div class="stack-desc">Mapping des champs Opportunity (Stage, Forecast Category, Pipeline Stages). Dataset structuré pour être directement transposable dans un export Salesforce réel.</div>
+        </div>
+        <div class="stack-card fade-in">
+          <div class="stack-icon">🤖</div>
+          <div class="stack-name">Claude (Anthropic)</div>
+          <div class="stack-role">Génération dataset synthétique</div>
+          <div class="stack-desc">Prompt engineering pour reproduire la structure exacte d'un export Salesforce — 5 000 deals, 21 colonnes, 24 mois, données réalistes B2B SaaS multi-régions.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CONTEXT ====== -->
+  <section id="context">
+    <div class="container">
+      <div class="section-label fade-in">Contexte</div>
+      <h2 class="section-title fade-in">Pourquoi ce projet ?</h2>
+
+      <div class="context-block">
+        <div class="context-text fade-in">
+          <p>Dans mon alternance, je travaille quotidiennement sur des problématiques <strong>Revenue Operations et Sales Analytics</strong> avec Salesforce comme outil principal. Manipuler de la donnée commerciale, construire des rapports pipeline, suivre la performance des équipes Sales — c'est mon terrain de jeu professionnel.</p>
+          <p><strong>Le problème</strong> : les données réelles de mon entreprise sont strictement confidentielles. Impossible de les exposer dans un portfolio public, même partiellement anonymisées.</p>
+          <p><strong>La solution</strong> : dataset synthétique reproduisant fidèlement la structure d'un export Salesforce — 5 000 deals, 21 colonnes, données réalistes couvrant 24 mois d'activité commerciale, avec toute la complexité d'un pipeline B2B SaaS multi-régions.</p>
+          <p>Chaque analyse, chaque formule, chaque visualisation produite ici est <strong>directement transposable à un environnement professionnel réel</strong>.</p>
+        </div>
+        <div class="context-links fade-in">
+          <a href="https://docs.google.com/spreadsheets/d/1PQcq9xID5rw0S-LPdm3NxQKNnfJkw3stU0gqV8S8Yis/edit?gid=1471056697#gid=1471056697" target="_blank" class="context-link">
+            <div class="context-link-icon">📗</div>
+            <div>
+              <div class="context-link-label">Google Sheets — Workbook complet</div>
+              <div class="context-link-sub">Raw Data · 3 Dashboards · TCD · Heatmap</div>
+            </div>
+          </a>
+          <div class="context-link" style="opacity:0.5; cursor: default;">
+            <div class="context-link-icon">📊</div>
+            <div>
+              <div class="context-link-label">Tableau Public — Dashboards interactifs</div>
+              <div class="context-link-sub">Publication en cours</div>
+            </div>
+          </div>
+          <div class="context-link" style="opacity:0.55; cursor: default;">
+            <div class="context-link-icon">📄</div>
+            <div>
+              <div class="context-link-label">Dataset source — Raw_Data_fixed.csv</div>
+              <div class="context-link-sub">5 000 lignes · 21 colonnes · Format Salesforce</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CTA ====== -->
+  <section id="cta">
+    <div class="cta-title">Voir les autres projets</div>
+    <div class="cta-sub">F1 · Discogs · Polymath · Carbon Balance · PayFit</div>
+    <div class="cta-actions">
+      <a href="index.html#projects" class="btn-primary">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Retour au portfolio
+      </a>
+      <a href="index.html#contact" class="btn-secondary">Me contacter</a>
+    </div>
+  </section>
+
+  <script>
+    // Lightbox
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').classList.add('open');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    // Fade-in on scroll
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 60);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
