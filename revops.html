@@ -286,6 +286,47 @@
     .stack-role { font-size: 0.78rem; color: var(--blue2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; font-family: var(--font-mono); }
     .stack-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
 
+    /* ====== SHEETS SCREENSHOTS ====== */
+    .sheets-screenshots { margin-top: 36px; }
+    .sheets-screenshots-label {
+      font-size: 0.78rem; color: var(--blue2); text-transform: uppercase;
+      letter-spacing: 0.1em; font-family: var(--font-mono);
+      margin-bottom: 16px;
+    }
+    .sheets-screenshots-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 640px) { .sheets-screenshots-grid { grid-template-columns: 1fr; } }
+    .sheets-shot-card {
+      position: relative; border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .sheets-shot-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(30,111,204,0.5);
+      box-shadow: 0 12px 40px rgba(30,111,204,0.18);
+    }
+    .sheets-shot-card img {
+      width: 100%; display: block;
+      filter: brightness(0.88) contrast(1.05);
+      transition: filter 0.3s;
+    }
+    .sheets-shot-card:hover img { filter: brightness(1) contrast(1.05); }
+    .sheets-shot-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(10,14,26,0.92) 0%, transparent 100%);
+      padding: 20px 18px 16px; pointer-events: none;
+    }
+    .sheets-shot-label {
+      display: block; font-family: var(--font2); font-size: 0.9rem;
+      font-weight: 600; color: #fff; margin-bottom: 4px;
+    }
+    .sheets-shot-sub {
+      display: block; font-size: 0.75rem; color: var(--blue2);
+      font-family: var(--font-mono);
+    }
+
     /* ====== LOD BLOCK ====== */
     .lod-block {
       background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
@@ -686,6 +727,27 @@
           <div class="stack-name">Architecture multi-onglets</div>
           <div class="stack-role">Table Reference · Raw Data immuable</div>
           <div class="stack-desc">Onglet Raw Data jamais modifié, table Reference centralisée pour les VLOOKUP, recalcul automatique de toutes les analyses à chaque modification source.</div>
+        </div>
+      </div>
+
+      <!-- Sheets Screenshots -->
+      <div class="sheets-screenshots fade-in">
+        <div class="sheets-screenshots-label">Aperçu du workbook</div>
+        <div class="sheets-screenshots-grid">
+          <div class="sheets-shot-card" onclick="openLightbox('assets/revops-sheets-pipeline.png', 'Dashboard 1 — Pipeline Overview · KPIs, pipeline par stage, at-risk deals')">
+            <img src="assets/revops-sheets-pipeline.png" alt="Google Sheets - Pipeline Overview" loading="lazy" />
+            <div class="sheets-shot-overlay">
+              <span class="sheets-shot-label">Dashboard 1 — Pipeline Overview</span>
+              <span class="sheets-shot-sub">SUMIF · VLOOKUP · KPIs globaux</span>
+            </div>
+          </div>
+          <div class="sheets-shot-card" onclick="openLightbox('assets/revops-sheets-drivers.png', 'Dashboard 2 — Performance Drivers · Pipeline par région, canal, industrie')">
+            <img src="assets/revops-sheets-drivers.png" alt="Google Sheets - Performance Drivers" loading="lazy" />
+            <div class="sheets-shot-overlay">
+              <span class="sheets-shot-label">Dashboard 2 — Performance Drivers</span>
+              <span class="sheets-shot-sub">SUMIFS · Region × Industry × Channel</span>
+            </div>
+          </div>
         </div>
       </div>
 
