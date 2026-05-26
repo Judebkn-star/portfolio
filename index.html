@@ -569,10 +569,13 @@
 
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.2rem;
       max-width: 1100px;
       margin: 0 auto;
+    }
+    @media (max-width: 720px) {
+      .projects-grid { grid-template-columns: 1fr; }
     }
 
     .project-card {
@@ -1217,7 +1220,7 @@
         <div class="project-body">
           <div class="project-tags">
             <span class="project-tag bi">Tableau</span>
-            <span class="project-tag" style="background:rgba(0,200,240,0.08);color:#00c8f0;border-color:rgba(0,200,240,0.2);">RevOps</span>
+            <span class="project-tag" style="background:rgba(0,200,240,0.08);color:#00c8f0;border-color:rgba(0,200,240,0.2);">Sales Analytics</span>
             <span class="project-tag sql">Google Sheets</span>
           </div>
           <div class="project-title">Sales Performance &amp; Pipeline Analytics</div>
