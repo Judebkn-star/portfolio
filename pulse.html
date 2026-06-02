@@ -450,7 +450,7 @@
     <h1 class="hero-title">Pulse — Pilotage de la<br>Performance Commerciale</h1>
     <p class="hero-desc">
       Du besoin flou à la mise en production : <strong>traduction d'un besoin métier en système de scoring défendable</strong>,
-      unification de 3 rapports Salesforce déconnectés, pipeline automatisé et dashboard de pilotage en temps réel.
+      unification de plusieurs rapports Salesforce déconnectés, pipeline automatisé et dashboard de pilotage en temps réel.
       Construit en alternance chez Les Parents Zens.
     </p>
     <div class="hero-meta">
@@ -601,7 +601,7 @@
         <p>
           Le vrai travail a été de <strong>challenger les hypothèses et formaliser des règles</strong> :
           combien vaut un R1 effectué sur un compte inactif vs programmé sur une piste ?
-          Comment lier 3 rapports Salesforce déconnectés sur un même compte sans double-comptage ?
+          Comment lier plusieurs rapports Salesforce déconnectés sur un même compte sans double-comptage ?
           Qu'est-ce qui se passe quand un compte disparaît du rapport sans R1 associé ?
         </p>
         <p>
@@ -615,7 +615,7 @@
         <div class="context-link">
           <div class="context-link-icon">☁️</div>
           <div>
-            <div class="context-link-label">Salesforce — 3 rapports source</div>
+            <div class="context-link-label">Salesforce — plusieurs rapports source</div>
             <div class="context-link-sub">Inactifs · Pistes · Activité R1 2026</div>
           </div>
         </div>
@@ -623,7 +623,7 @@
           <div class="context-link-icon">⚙️</div>
           <div>
             <div class="context-link-label">N8N — Orchestration & extraction</div>
-            <div class="context-link-sub">SOAP API · 3 rapports · 1 webhook · 1 clic</div>
+            <div class="context-link-sub">SOAP API · plusieurs rapports · 1 webhook · 1 clic</div>
           </div>
         </div>
         <div class="context-link">
@@ -651,7 +651,7 @@
       <div class="pipe-node">
         <div class="pipe-node-icon">☁️</div>
         <div class="pipe-node-name">Salesforce</div>
-        <div class="pipe-node-sub">3 rapports source</div>
+        <div class="pipe-node-sub">plusieurs rapports source</div>
       </div>
       <div class="pipe-arrow">
         <div class="pipe-arrow-line"></div>
@@ -819,11 +819,11 @@
       <div class="constraint-card fade-in">
         <div class="constraint-problem">Contrainte #2</div>
         <div class="constraint-title">Rapport d'activités Salesforce incomplet — intégrateur bloquant</div>
-        <div class="constraint-solution">→ Contournement : cross-référencement des 3 rapports disponibles pour inférer l'activité réelle</div>
+        <div class="constraint-solution">→ Contournement : cross-référencement de plusieurs rapports disponibles pour inférer l'activité réelle</div>
       </div>
       <div class="constraint-card fade-in">
         <div class="constraint-problem">Contrainte #3</div>
-        <div class="constraint-title">Noms de comptes incohérents entre les 3 rapports</div>
+        <div class="constraint-title">Noms de comptes incohérents entre plusieurs rapports</div>
         <div class="constraint-solution">→ Normalisation + ordre de priorité de matching : compte → piste → contact</div>
       </div>
       <div class="constraint-card fade-in">
@@ -852,13 +852,13 @@
         <div class="stack-icon">⚙️</div>
         <div class="stack-name">N8N</div>
         <div class="stack-role">Orchestration — Pipeline</div>
-        <div class="stack-desc">Workflow actif Docker local. SOAP Login Salesforce → extraction 3 rapports simultanés → normalisation → snapshot. 1 bouton dans Pulse déclenche tout.</div>
+        <div class="stack-desc">Workflow actif Docker local. SOAP Login Salesforce → extraction plusieurs rapports simultanés → normalisation → snapshot. 1 bouton dans Pulse déclenche tout.</div>
       </div>
       <div class="stack-card fade-in">
         <div class="stack-icon">☁️</div>
         <div class="stack-name">Salesforce API (SOAP)</div>
         <div class="stack-role">Source de données</div>
-        <div class="stack-desc">3 rapports : Prospects inactifs, Pistes, Activité R1 2026. Extraction via SOAP Report API, parsing des colonnes, cross-référencement par nom de compte.</div>
+        <div class="stack-desc">Plusieurs rapports source : Prospects inactifs, Pistes, Activité R1 2026. Extraction via SOAP Report API, parsing des colonnes, cross-référencement par nom de compte.</div>
       </div>
       <div class="stack-card fade-in">
         <div class="stack-icon">🐍</div>
