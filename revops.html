@@ -417,9 +417,13 @@
     @media (max-width: 480px) {
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     }
-  </style>
+      .hero-grid-3d { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .hero-grid-3d-inner { position: absolute; width: 220%; height: 220%; top: 25%; left: -60%; background-image: linear-gradient(rgba(0,200,240,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,240,0.05) 1px, transparent 1px); background-size: 64px 64px; transform: rotateX(55deg); animation: grid-scroll 18s linear infinite; mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black 20%, transparent 75%); }
+    @keyframes grid-scroll { 0% { background-position: 0 0; } 100% { background-position: 0 64px; } }
+</style>
 </head>
 <body>
+<div class="hero-grid-3d"><div class="hero-grid-3d-inner"></div></div>
 
   <!-- ====== NAV ====== -->
   <nav>
