@@ -180,9 +180,32 @@
       border-radius: 14px; overflow: hidden;
       border: 1px solid var(--border);
       box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
-      background: #000;
+      background: #000; position: relative;
     }
     .video-wrap video { width: 100%; display: block; }
+    .video-play-btn {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(6,9,15,0.45);
+      cursor: pointer; transition: background 0.25s;
+      z-index: 2;
+    }
+    .video-play-btn:hover { background: rgba(6,9,15,0.25); }
+    .video-play-btn.hidden { display: none; }
+    .play-circle {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(10,14,26,0.75); backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .video-play-btn:hover .play-circle {
+      transform: scale(1.1);
+      border-color: var(--blue2);
+      background: rgba(30,111,204,0.3);
+    }
+    .play-circle svg { margin-left: 5px; }
 
     /* ====== PILLARS ====== */
     .pillars-grid {
@@ -510,7 +533,12 @@
       et synchronisation Salesforce en un clic.
     </p>
     <div class="video-wrap fade-in">
-      <video controls preload="metadata">
+      <div class="video-play-btn" id="playBtn" onclick="startVideo()">
+        <div class="play-circle">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+      </div>
+      <video id="demoVideo" preload="metadata">
         <source src="assets/pulse-demo-v2.mp4" type="video/mp4" />
       </video>
     </div>
@@ -902,6 +930,15 @@
 </div>
 
 <script>
+  // ── Video play button ──
+  function startVideo() {
+    const video = document.getElementById('demoVideo');
+    const btn   = document.getElementById('playBtn');
+    btn.classList.add('hidden');
+    video.controls = true;
+    video.play();
+  }
+
   // ── Carousel ──
   let carouselIndex = 0;
   const TOTAL = 5;
