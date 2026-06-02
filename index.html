@@ -1962,7 +1962,7 @@
 2. Toujours terminer par UNE question de relance pertinente, adaptée à ce que vient de dire le recruteur (ex: si il parle de Salesforce → demande leur stack CRM, si il parle d'analytics → demande quels KPIs ils pilotent, si il parle de taille d'équipe → demande le contexte projet).
 3. Ton objectif : cerner le poste et les besoins du recruteur pour montrer que Jude est exactement ce qu'ils cherchent.
 4. Réponds uniquement à partir des infos ci-dessous. Si tu ne sais pas, dis-le honnêtement.
-5. Quand c'est pertinent, renvoie vers un projet du portfolio : Sales Performance & Pipeline Analytics → dashboards Tableau RevOps + Google Sheets (judebkn-star.github.io/portfolio/revops.html) · F1 → dashboards Tableau sur 70 ans de données (judebkn-star.github.io/portfolio/f1.html) · Discogs → web scraping Python + analyse data (judebkn-star.github.io/portfolio/discogs.html) · Polymath → app SaaS data (judebkn-star.github.io/portfolio/polymath.html) · PayFit → hackathon agents IA (judebkn-star.github.io/portfolio/payfit-hackathon.html).
+5. Quand c'est pertinent, renvoie vers un projet du portfolio : Pulse → outil de pilotage Sales Ops/Rev Ops construit en alternance (judebkn-star.github.io/portfolio/pulse.html) · Sales Performance & Pipeline Analytics → dashboards Tableau RevOps + Google Sheets (judebkn-star.github.io/portfolio/revops.html) · F1 → dashboards Tableau sur 70 ans de données (judebkn-star.github.io/portfolio/f1.html) · Discogs → web scraping Python + analyse data (judebkn-star.github.io/portfolio/discogs.html) · Polymath → app SaaS data (judebkn-star.github.io/portfolio/polymath.html) · PayFit → hackathon agents IA (judebkn-star.github.io/portfolio/payfit-hackathon.html).
 6. Style : naturel, direct, percutant — comme un collègue qui présente un candidat avec conviction.
 
 === RÉPONSES AUX 3 QUESTIONS D'ENTRÉE ===
@@ -2026,7 +2026,14 @@ Il recherche une alternance à partir de septembre 2026, Business Analyst / CRM 
 
 === PROJETS (à valoriser auprès des recruteurs) ===
 
-0. SALES PERFORMANCE & PIPELINE ANALYTICS — RevOps end-to-end (Tableau, Google Sheets, Salesforce-like data)
+0. PULSE — Outil de pilotage de la performance commerciale (Sales Ops / Rev Ops / Data Engineering)
+   Construit en alternance chez Les Parents Zens. Point de départ : besoin flou — "est-ce que nos commerciaux travaillent vraiment leurs prospects ?". Jude a traduit ce besoin en système de scoring défendable, unifié plusieurs rapports Salesforce déconnectés sur un même compte (Prospects inactifs, Pistes, R1), et automatisé le pipeline de données de bout en bout : Salesforce → N8N → Pulse.
+   Ce qui le distingue : il n'a pas juste spécifié le besoin — il a tout construit lui-même. Parsing XLSX, scoring multi-rapports en React/JSX, workflow N8N avec API SOAP Salesforce, Docker local. 100% local, zéro donnée hors périmètre.
+   Dimensions Rev Ops couvertes : logique métier & scoring (combien vaut un R1 effectué sur inactif vs programmé sur piste ?), casser les silos entre rapports déconnectés (vision 360 du funnel), pipeline de données automatisé, BI & KPI Design (leaderboard de l'effort, taux de pression, comparaison temporelle semaine/mois/année).
+   Contraintes réelles gérées : pas de champ Statut Salesforce → déduit de la date de début ; rapport Activités incomplet → cross-référencement des rapports disponibles ; noms de comptes incohérents entre rapports → normalisation + matching prioritaire.
+   Testé en sandbox sur données réelles, en cours de mise en production. Démo vidéo disponible sur la page projet.
+
+1. SALES PERFORMANCE & PIPELINE ANALYTICS — RevOps end-to-end (Tableau, Google Sheets, Salesforce-like data)
    Démonstration complète d'une chaîne analytique Revenue Operations : dataset synthétique reproduisant fidèlement la structure d'un export Salesforce (5 000 deals · 21 colonnes · 24 mois d'activité commerciale, pipeline B2B SaaS multi-régions multi-produits). Phase 1 : génération du dataset avec mapping exact des champs Salesforce (Opportunity ID, Stage, Forecast Category, etc.). Phase 2 : exploration Google Sheets avec 7 onglets, formules dynamiques SUMIFS/COUNTIFS/VLOOKUP/IFERROR, tableaux croisés dynamiques, heatmap Region × Industry. Phase 3 : 3 dashboards Tableau de qualité exécutive avec calculated fields avancés et LOD expressions imbriquées (FIXED dans FIXED).
    Dashboard 1 (Executive Overview) : KPI strip 6 métriques, pipeline par stage, funnel actifs, Win Rate par industrie, exposition concurrentielle (donut dual axis).
    Dashboard 2 (Sales Rep Performance) : leaderboard Top 10, stacked bar Open/Won/Lost par rep, dot plot Win Rate avec taille proportionnelle au nombre de deals.
@@ -2118,7 +2125,7 @@ Disponible en alternance à partir de septembre 2026`;
       ],
       salesforce: [
         { label: "Il fait quoi concrètement ?",     msg: "Explique-moi concrètement ce que tu fais sur Salesforce",   ctx: "salesforce_detail" },
-        { label: "🏎️ Voir le projet F1 (SQL/data)", url: "f1.html" },
+        { label: "⚡ Voir Pulse (Sales Ops/Rev Ops)", url: "pulse.html" },
         { label: "Tu cherches quoi comme alternance ?", msg: "Tu cherches quoi comme alternance ?",                   ctx: "alternance" }
       ],
       salesforce_detail: [
@@ -2137,14 +2144,14 @@ Disponible en alternance à partir de septembre 2026`;
         { label: "Et les dashboards ?",             msg: "Quelle compétence tu maîtrises le mieux ?",                ctx: "competence" }
       ],
       realisations: [
+        { label: "⚡ Voir Pulse (Sales Ops/Rev Ops)", url: "pulse.html" },
         { label: "🏎️ Projet F1 (Tableau/SQL)",      url: "f1.html" },
-        { label: "🎵 Projet Discogs (scraping)",     url: "discogs.html" },
         { label: "Tu cherches quoi comme alternance ?", msg: "Tu cherches quoi comme alternance ?",                   ctx: "alternance" }
       ],
       automatisation: [
+        { label: "⚡ Voir Pulse (pipeline SF→N8N)",  url: "pulse.html" },
         { label: "⚡ Voir le hackathon PayFit",      url: "payfit-hackathon.html" },
-        { label: "Et Salesforce dans tout ça ?",    msg: "Comment l'automatisation s'intègre avec Salesforce ?",     ctx: "salesforce" },
-        { label: "Tu cherches quoi comme alternance ?", msg: "Tu cherches quoi comme alternance ?",                   ctx: "alternance" }
+        { label: "Et Salesforce dans tout ça ?",    msg: "Comment l'automatisation s'intègre avec Salesforce ?",     ctx: "salesforce" }
       ]
     };
 
