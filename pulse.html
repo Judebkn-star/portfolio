@@ -493,6 +493,51 @@
   </div>
 </section>
 
+<!-- SCREENSHOTS -->
+<section id="screenshots">
+  <div class="container">
+    <div class="section-label fade-in">Aperçu</div>
+    <h2 class="section-title fade-in">L'application en production</h2>
+    <p class="section-desc fade-in">
+      Interface construite avec React + Babel standalone, serveur Python local.
+      Zéro cloud, zéro donnée hors périmètre.
+    </p>
+
+    <div class="screenshots-grid">
+      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-dashboard.png')">
+        <img src="assets/pulse-dashboard.png" alt="Dashboard Pulse" loading="lazy" />
+        <div class="screenshot-overlay">
+          <div class="screenshot-label">Dashboard · KPIs temps réel</div>
+        </div>
+      </div>
+      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-comptes-risque.png')">
+        <img src="assets/pulse-comptes-risque.png" alt="Comptes à risque" loading="lazy" />
+        <div class="screenshot-overlay">
+          <div class="screenshot-label">Comptes à risque · ancienneté</div>
+        </div>
+      </div>
+      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-historique-tableau.png')">
+        <img src="assets/pulse-historique-tableau.png" alt="Historique commerciaux" loading="lazy" />
+        <div class="screenshot-overlay">
+          <div class="screenshot-label">Historique · comparaison commerciaux</div>
+        </div>
+      </div>
+      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-historique-graphe.png')">
+        <img src="assets/pulse-historique-graphe.png" alt="Tendance globale" loading="lazy" />
+        <div class="screenshot-overlay">
+          <div class="screenshot-label">Tendance globale · 8 semaines</div>
+        </div>
+      </div>
+      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-sync.png')">
+        <img src="assets/pulse-sync.png" alt="Sync Salesforce" loading="lazy" />
+        <div class="screenshot-overlay">
+          <div class="screenshot-label">Sync · pipeline Salesforce → N8N</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CONTEXTE & DÉFI -->
 <section id="context">
   <div class="container">
@@ -739,51 +784,6 @@
         <div class="constraint-problem">Contrainte #4</div>
         <div class="constraint-title">Risque de double-comptage entre snapshots consécutifs</div>
         <div class="constraint-solution">→ Chaque action comptée à sa première apparition uniquement. Chaque paire de snapshots parcourue individuellement sur la période</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SCREENSHOTS -->
-<section id="screenshots">
-  <div class="container">
-    <div class="section-label fade-in">Aperçu</div>
-    <h2 class="section-title fade-in">L'application en production</h2>
-    <p class="section-desc fade-in">
-      Interface construite avec React + Babel standalone, serveur Python local.
-      Zéro cloud, zéro donnée hors périmètre.
-    </p>
-
-    <div class="screenshots-grid">
-      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-dashboard.png')">
-        <img src="assets/pulse-dashboard.png" alt="Dashboard Pulse" loading="lazy" />
-        <div class="screenshot-overlay">
-          <div class="screenshot-label">Dashboard · KPIs temps réel</div>
-        </div>
-      </div>
-      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-comptes-risque.png')">
-        <img src="assets/pulse-comptes-risque.png" alt="Comptes à risque" loading="lazy" />
-        <div class="screenshot-overlay">
-          <div class="screenshot-label">Comptes à risque · ancienneté</div>
-        </div>
-      </div>
-      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-historique-tableau.png')">
-        <img src="assets/pulse-historique-tableau.png" alt="Historique commerciaux" loading="lazy" />
-        <div class="screenshot-overlay">
-          <div class="screenshot-label">Historique · comparaison commerciaux</div>
-        </div>
-      </div>
-      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-historique-graphe.png')">
-        <img src="assets/pulse-historique-graphe.png" alt="Tendance globale" loading="lazy" />
-        <div class="screenshot-overlay">
-          <div class="screenshot-label">Tendance globale · 8 semaines</div>
-        </div>
-      </div>
-      <div class="screenshot-card fade-in" onclick="openLightbox('assets/pulse-sync.png')">
-        <img src="assets/pulse-sync.png" alt="Sync Salesforce" loading="lazy" />
-        <div class="screenshot-overlay">
-          <div class="screenshot-label">Sync · pipeline Salesforce → N8N</div>
-        </div>
       </div>
     </div>
   </div>
